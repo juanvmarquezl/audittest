@@ -40,7 +40,6 @@ time.sleep(seg)
 #~ #~
 #~ #~
 url = "http://%s:%s/xmlrpc/" % (host, port)
-print url
 common_proxy = xmlrpclib.ServerProxy(url + "common")
 object_proxy = xmlrpclib.ServerProxy(url + "object")
 #~ #~

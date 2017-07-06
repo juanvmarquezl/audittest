@@ -39,6 +39,10 @@ print 'Iniciando pruebas de AuditTest...\n'
 #~ account
 add_test_result(
     account.audit_generic_99999_acounts_moves(context))
+add_test_result(
+    account.audit_opening_account_periods(context))
+add_test_result(
+    account.audit_closed_account_period_moves_state(context))
 
 #~ Stock
 add_test_result(
