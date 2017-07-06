@@ -51,8 +51,8 @@ def audit_tcv_stock_changes(context):
 
 
 def audit_tcv_bunble_status(context):
-    #~ date_start = context.get('date_start')
-    #~ date_end = context.get('date_end')
+    date_start = context.get('date_start')
+    date_end = context.get('date_end')
     res = {
         'name': u'Estatus de bundles de exportación',
         'group': 'stock',
@@ -64,7 +64,8 @@ def audit_tcv_bunble_status(context):
         'start': time.time(),
         }
     bundles_ids = lnk.execute(
-        'tcv.bundle', 'search', [])
+        'tcv.bundle', 'search',
+        [('date', '>=', date_start), ('date', '<=', date_end)])
     bundles = lnk.execute(
         'tcv.bundle', 'read', bundles_ids,
         ('name', 'line_ids', 'weight_net', 'location_id', 'product_id',
