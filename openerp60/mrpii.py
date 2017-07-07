@@ -129,7 +129,8 @@ def audit_tcv_mrp_supplies_picking(context):
         'group': 'mrp',
         'data': [],
         'detail': u'Los albaranes listados a continuación no han sido '
-        'aprobados.',
+        u'aprobados. Ver: Manufactura II -> Procesos productivos -> '
+        u'Utilización de insumos de producción',
         'model': 'tcv.mrp.production.supplies',
         'start': time.time(),
         }

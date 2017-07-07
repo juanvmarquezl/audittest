@@ -161,7 +161,7 @@ def check_imex_purchase_orders(context):
     orders = lnk.execute(
         'purchase.order', 'read', order_ids,
         ['name', 'date_order', 'partner_id', 'invoice_ids', 'state',
-        'pricelist_id', 'import_id'])
+         'pricelist_id', 'import_id', 'description'])
     data = [('Tipo', 'Ref/Nro', 'Fecha', 'Proveedor', u'Información')]
     for o in orders:
         obs_oc = []
@@ -171,12 +171,37 @@ def check_imex_purchase_orders(context):
             obs_oc.append(u'Solicitud de presupuesto')
         if o['pricelist_id'][0] == 8:
             obs_oc.append(u'Lista de precios incorrecta')
+        if o['invoice_ids']:
+            obs_inv = []
+            invoices = lnk.execute(
+                'account.invoice', 'read', o['invoice_ids'],
+                ['journal_id', 'supplier_invoice_number', 'date_document',
+                 'name', 'partner_id', 'expedient', 'dua_form_id', 'state',
+                 'import_id'])
+            for i in invoices:
+                if i['journal_id'][0] != 6:
+                    obs_inv.append(u'Diario: %s' % i['journal_id'][1])
+                elif not i['dua_form_id']:
+                    obs_inv.append(u'Falta DUA')
+                if not i['import_id']:
+                    obs_inv.append(u'Falta expediente importación')
+                if i['state'] == 'draft':
+                    obs_inv.append(u'En borrador')
+                if obs_inv:
+                    obs_inv.append(i['name'])
+            if obs_inv:
+                data.append((
+                    'INV',
+                    i.get('supplier_invoice_number') or '',
+                    i.get('date_document') or '',
+                    i['partner_id'][1],
+                    u', '.join(obs_inv) + '.'))
         if obs_oc:
-            print o
+            obs_oc.append(o.get('description') or '')
             data.append((
                 'O/C',
                 o['name'],
-                o['date_order'],
+                o.get('date_order') or '',
                 o['partner_id'][1],
                 u', '.join(obs_oc) + '.'))
     if len(data) > 1:
