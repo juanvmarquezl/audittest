@@ -137,4 +137,50 @@ def audit_closed_account_period_moves_state(context):
     return res
 
 
+def check_imex_purchase_orders(context):
+    date_start = context.get('date_start')
+    date_end = context.get('date_end')
+    res = {
+        'name': u'Estado de órdenes de compra y facturas de importación',
+        'group': 'account',
+        'data': [],
+        'detail': u'Verifica el estado de los documentos de compras '
+                  u'de importación, con base en la lista de empresas '
+                  u'registradas en los expedientes de importación.',
+        'start': time.time(),
+        }
+    imex_ids = lnk.execute(
+        'tcv.import.management', 'search', [('state', '!=', 'cancel')])
+    imex = lnk.execute(
+        'tcv.import.management', 'read', imex_ids, ['partner_id'])
+    partner_ids = list(set([x['partner_id'][0] for x in imex]))
+    order_ids = lnk.execute(
+        'purchase.order', 'search',
+        [('partner_id', 'in', partner_ids),
+         ('date_order', '>=', date_start), ('date_order', '<=', date_end)])
+    orders = lnk.execute(
+        'purchase.order', 'read', order_ids,
+        ['name', 'date_order', 'partner_id', 'invoice_ids', 'state',
+        'pricelist_id', 'import_id'])
+    data = [('Tipo', 'Ref/Nro', 'Fecha', 'Proveedor', u'Información')]
+    for o in orders:
+        obs_oc = []
+        if o['state'] == 'except_invoice':
+            obs_oc.append(u'Excepción de fatura')
+        if o['state'] == 'draft':
+            obs_oc.append(u'Solicitud de presupuesto')
+        if o['pricelist_id'][0] == 8:
+            obs_oc.append(u'Lista de precios incorrecta')
+        if obs_oc:
+            print o
+            data.append((
+                'O/C',
+                o['name'],
+                o['date_order'],
+                o['partner_id'][1],
+                u', '.join(obs_oc) + '.'))
+    if len(data) > 1:
+        res['data'] = data
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

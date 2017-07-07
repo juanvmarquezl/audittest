@@ -43,6 +43,8 @@ add_test_result(
     account.audit_opening_account_periods(context))
 add_test_result(
     account.audit_closed_account_period_moves_state(context))
+add_test_result(
+    account.check_imex_purchase_orders(context))
 
 #~ Stock
 add_test_result(
