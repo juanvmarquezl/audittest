@@ -158,6 +158,8 @@ def audit_tcv_mrp_supplies_picking(context):
                 res['data'].append((
                     i['ref'], i['date'], i['name'] or '', i['state'],
                     data['picking_id']))
+    if len(res['data']) == 1:
+        res['data'] = []
     return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

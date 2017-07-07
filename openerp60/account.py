@@ -127,8 +127,8 @@ def audit_closed_account_period_moves_state(context):
             u'Número', 'Referencia', 'Diario', u'Período', 'Fecha', 'Estado'))
     for m in moves:
         res['data'].append((
-            m.get('name', ''),
-            m.get('ref', 'N/A'),
+            m.get('name') or '',
+            m.get('ref') or 'N/A',
             m['journal_id'][1],
             m['period_id'][1],
             m['date'],
