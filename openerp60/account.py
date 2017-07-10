@@ -187,7 +187,7 @@ def check_imex_purchase_orders(context):
                     obs_inv.append(u'Falta expediente importación')
                 if i['state'] == 'draft':
                     obs_inv.append(u'En borrador')
-                if obs_inv:
+                if obs_inv and i['name']:
                     obs_inv.append(i['name'])
             if obs_inv:
                 data.append((

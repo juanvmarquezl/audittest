@@ -123,4 +123,52 @@ def audit_tcv_bunble_status(context):
                 u', '.join(obs) + '.'))
     return res
 
+
+def check_steel_grit_bags_25(context):
+    date_start = context.get('date_start')
+    date_end = context.get('date_end')
+    res = {
+        'name': u'Movimientos de granalla no múltiplos de 25Kg',
+        'group': 'stock',
+        'data': [],
+        'detail': u'Verifica que las cantidades indicadas en los '
+                  u'movimientos de stock de granalla sean múltiplos de 25Kg',
+        'start': time.time(),
+        }
+    categ_ids = lnk.execute(
+        'product.category', 'search', [('name', '=', u'GRANALLA')])
+    product_ids = lnk.execute(
+        'product.product', 'search', [('categ_id', 'in', categ_ids)])
+    move_ids = lnk.execute(
+        'stock.move', 'search',
+        [('date', '>=', date_start), ('date', '<=', date_end),
+         ('product_id', 'in', product_ids), ('state', '!=', 'cancel')])
+    moves = lnk.execute(
+        'stock.move', 'read', move_ids,
+        ('picking_id', 'product_uom', 'product_qty', 'product_id', 'date',
+         'name', 'prodlot_id', 'state'))
+    res['data'].append((
+        u'Albarán', 'Producto', u'Lote', 'Cantidad', 'Fecha', u'Motivo',
+        'Estado'))
+    for m in moves:
+        if m['product_uom'][0] == 2:
+            qty = m['product_qty']
+        elif m['product_uom'][0] == 6:
+            qty = m['product_qty'] * 1000
+        else:
+            qty = -1
+        if qty % 25:
+            res['data'].append((
+                m['picking_id'] and m['picking_id'][1] or '',
+                m['product_id'] and m['product_id'][1] or '',
+                m['prodlot_id'] and m['prodlot_id'][1] or '',
+                '%.2f %s' % (qty, m['product_uom'][1]),
+                m['date'] and m['date'].split(' ')[0] or '',
+                m['name'],
+                m['state']
+                ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
