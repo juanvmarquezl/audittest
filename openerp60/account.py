@@ -208,4 +208,111 @@ def check_imex_purchase_orders(context):
         res['data'] = data
     return res
 
+
+def check_sequence(params):
+    doc_ids = lnk.execute(
+        params['model'], 'search', params['filter'])
+    f = params['field'][0]
+    docs = lnk.execute(
+        params['model'], 'read', doc_ids, [f])
+    oos = []
+    data = [x[f] for x in docs]
+    invalids = ('False', False)
+    for i in invalids:
+        while i in data:
+            data.remove(i)
+    if params.get('trim_field'):
+        data = [x[params['trim_field']:] for x in data]
+    sec = [int(x.replace('-', '').replace('EX', '')) for x in data]
+
+    sec.sort()
+
+    for x in sec[:-1]:
+        if x + 1 not in sec:
+            oos.append(x)
+    return oos and [str(x) for x in oos] or []
+
+
+def append_document_sequence(res, params):
+    docs = check_sequence(params)
+    if docs:
+        res['data'].append((
+            params['name'],
+            params['field'][1],
+            ', '.join(docs),
+            ))
+
+
+def check_document_sequences(context):
+    res = {
+        'name': u'Verificar secuencia de documentos',
+        'group': 'account',
+        'data': [('Documento', 'Campo', 'Saltos de secuencia en')],
+        'detail': u'Verifica que no existan saltos en la secuencia de '
+                  u'los documentos.',
+        'start': time.time(),
+        }
+    params = {
+        'name': 'Facturas de venta (Nacionales)',
+        'model': 'account.invoice',
+        'filter': [('type', '=', 'out_invoice'),
+                   ('date_invoice', '>=', context['date_start']),
+                   ('date_invoice', '<=', context['date_end']),
+                   ('state', '!=', 'draft'),
+                   ('journal_id', '=', 8),
+                   ],
+        'field': ('number', u'Número'),
+        }
+    append_document_sequence(res, params)
+    params = {
+        'name': 'Facturas de venta (Exportación)',
+        'model': 'account.invoice',
+        'filter': [('type', '=', 'out_invoice'),
+                   ('date_invoice', '>=', context['date_start']),
+                   ('date_invoice', '<=', context['date_end']),
+                   ('state', '!=', 'draft'),
+                   ('journal_id', '=', 280),
+                   ],
+        'field': ('number', u'Número'),
+        }
+    append_document_sequence(res, params)
+    params = {
+        'name': 'Notas de crédito clientes (Nacionales)',
+        'model': 'account.invoice',
+        'filter': [('type', '=', 'out_refund'),
+                   ('date_invoice', '>=', context['date_start']),
+                   ('date_invoice', '<=', context['date_end']),
+                   ('state', '!=', 'draft'),
+                   ('journal_id', '=', 8),
+                   ],
+        'field': ('number', u'Número'),
+        }
+    append_document_sequence(res, params)
+    params = {
+        'name': 'Documentos de venta',
+        'model': 'account.invoice',
+        'filter': [('type', 'in', ('out_invoice', 'out_refund')),
+                   ('date_invoice', '>=', context['date_start']),
+                   ('date_invoice', '<=', context['date_end']),
+                   ('state', '!=', 'draft'),
+                   ],
+        'field': ('nro_ctrl', u'Número control'),
+        }
+    append_document_sequence(res, params)
+    params = {
+        'name': 'Comprobantes de retencion de IVA proveedores',
+        'model': 'account.wh.iva',
+        'filter': [('type', 'in', ('in_invoice', 'in_refund')),
+                   ('date', '>=', context['date_start']),
+                   ('date', '<=', context['date_end']),
+                   ('state', 'in', ('done', 'cancel')),
+                   ],
+        'field': ('number', u'Número'),
+        'trim_field': -8,
+        }
+    append_document_sequence(res, params)
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

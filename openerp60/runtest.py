@@ -30,7 +30,7 @@ def add_test_result(test):
         'elapsed': str(timedelta(seconds=end - test.get('start', end))),
         })
     context['count'] += 1
-    print '\ttesting: [%s] %s' % (test.get('group'), test.get('name'))
+    print '\tTesting: [%s] %s' % (test.get('group'), test.get('name'))
     if test.get('data'):
         results[test.get('group')].append(test)
 
@@ -45,6 +45,8 @@ add_test_result(
     account.audit_closed_account_period_moves_state(context))
 add_test_result(
     account.check_imex_purchase_orders(context))
+add_test_result(
+    account.check_document_sequences(context))
 
 #~ Stock
 add_test_result(
