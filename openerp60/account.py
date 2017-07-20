@@ -315,4 +315,37 @@ def check_document_sequences(context):
         res['data'] = []
     return res
 
+
+def check_customs_form_state(context):
+    date_start = context.get('date_start')
+    date_end = context.get('date_end')
+    res = {
+        'name': u'Estado de planilla de liquidacionde impuestos aduanales F86',
+        'group': 'account',
+        'data': [],
+        'detail': u'Verifica el estado de las planillas de impuestos '
+                  u'aduanales (Forma 86) asociadas a expedientes de '
+                  u'importación.',
+        'start': time.time(),
+        }
+    imex_ids = lnk.execute(
+        'customs.form', 'search', [('state', '=', 'draft'),
+                                   ('date_liq', '>=', date_start),
+                                   ('date_liq', '<=', date_end)])
+    imex = lnk.execute(
+        'customs.form', 'read', imex_ids,
+        ['name', 'ref', 'dua_form_id', 'date_liq', 'state'])
+    if imex:
+        res['data'].append((
+            u'Número', 'Referencia', 'DUA', 'Fecha', 'Estado'))
+    for i in imex:
+        res['data'].append((
+            i.get('name') or '',
+            i.get('ref') or 'N/A',
+            i['dua_form_id'] and i['dua_form_id'][1] or '',
+            i['date_liq'],
+            u'Borrador',
+            ))
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

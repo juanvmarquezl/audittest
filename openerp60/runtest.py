@@ -1,7 +1,9 @@
 # -*- encoding: utf-8 -*-
-import account
+import sale
+import purchase
 import stock
 import mrpii
+import account
 from output_html import export_to_html
 import time
 from datetime import timedelta
@@ -9,9 +11,11 @@ import openerp_link as lnk
 
 
 results = {
-    'account': [],
+    'sale': [],
+    'purchase': [],
     'stock': [],
     'mrp': [],
+    'account': [],
     }
 
 context = {
@@ -36,17 +40,13 @@ def add_test_result(test):
 
 
 print 'Iniciando pruebas de AuditTest...\n'
-#~ account
+#~ Sale
 add_test_result(
-    account.audit_generic_99999_acounts_moves(context))
+    sale.audit_sale_order_state(context))
+
+#~ Purchase
 add_test_result(
-    account.audit_opening_account_periods(context))
-add_test_result(
-    account.audit_closed_account_period_moves_state(context))
-add_test_result(
-    account.check_imex_purchase_orders(context))
-add_test_result(
-    account.check_document_sequences(context))
+    purchase.audit_purchase_order_state(context))
 
 #~ Stock
 add_test_result(
@@ -65,6 +65,20 @@ add_test_result(
     mrpii.audit_tcv_mrp_waste_slab_state(context))
 add_test_result(
     mrpii.audit_tcv_mrp_supplies_picking(context))
+
+#~ account
+add_test_result(
+    account.audit_generic_99999_acounts_moves(context))
+add_test_result(
+    account.audit_opening_account_periods(context))
+add_test_result(
+    account.audit_closed_account_period_moves_state(context))
+add_test_result(
+    account.check_imex_purchase_orders(context))
+add_test_result(
+    account.check_document_sequences(context))
+add_test_result(
+    account.check_customs_form_state(context))
 
 print '\nPruebas ejecutadas: %s' % context['count']
 
