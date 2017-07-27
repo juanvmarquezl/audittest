@@ -4,6 +4,10 @@ import time
 import calendar
 
 
+# Cache for account_ids
+__account_code_ids__ = {}
+
+
 def audit_get_periods(context):
     if context.get('account_periods'):
         return context.get('account_periods')
@@ -26,9 +30,13 @@ def audit_get_periods(context):
 
 
 def get_account_id(code):
+    if code in __account_code_ids__:
+        return __account_code_ids__[code]
     ids = lnk.execute(
         'account.account', 'search', [('code', '=', code)])
-    return ids and ids[0] or 0
+    acc_id = ids and ids[0] or 0
+    __account_code_ids__[code] = acc_id
+    return acc_id
 
 
 def actual_period(period):
@@ -429,6 +437,59 @@ def check_zero_balance_accounts(context):
                         acc,
                         balance.get('acc_name') or '',
                         balance.get('balance'),
+                        ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
+
+def check_move_in_period_accounts(context):
+    res = {
+        'name': u'Cuentas que deben tener movimento cada período',
+        'group': 'account',
+        'data': [],
+        'detail': u'Verifica que las cuentas seleccionadas tengan algún '
+                  u'movimiento registrado en cada uno de los periodos. Se '
+                  u'omite el período actual.',
+        'start': time.time(),
+        }
+    accounts = (
+        '1330199999',  # DEPR.ACUM.EDIFICIOS
+        '1330299999',  # DEPR.ACUM.INSTALACIONES
+        '1330399999',  # DEPR.ACUM.MAQUINARIAS
+        '1330400003',  # AMORTIZACION CANTERA LA LIMONERA
+        '1330400004',  # AMORTIZACION CANTERA EL CHIVITO
+        '1330599999',  # DEPR.ACUM.VEHICULOS
+        '1330699999',  # DEPR.ACUM.MOBILIARIOS Y EQUIPOS DE OFICINAS
+        '1330799999',  # DEPR.ACUM.UTILES Y HERRAMIENTAS
+        '1330899999',  # DEPR.ACUM.EQUIPOS DE COMPUTACION
+        '1331099999',  # DEPR.ACUM.EQUIPOS DE SEGURIDAD INTERNA
+        '2300100001',  # PROVISION ART.142 "A" GARANTIA PREST.SOC.(TRIM)
+        '5135500100',  # DEPRECIACIÓN EDIFICIOS
+        '5135500110',  # DEPRECIACIÓN INSTALACIONES Y MEJORAS
+        '5135500120',  # DEPRECIACIÓN MAQUINARIA Y EQUIPO
+        '5135500140',  # DEPRECIACIÓN VEHÍCULOS DE PLANTA
+        '5135500150',  # DEPRECIACIÓN ÚTILES Y HERRAMIENTAS
+        '7230900006',  # DEPRECIACIÓN  MOBILIARIO Y EQUIPO OFICINA
+        '7230900008',  # DEPRECIACIÓN EQUIPOS DE COMPUTACIÓN
+        #~ '7230900009',  # DEPRECIACIÓN EQUIPOS DE TELECOMUNICACIONES
+        '7230900010',  # DEPRECIACIÓN EQUIPOS DE SEGURIDAD
+        )
+    audit_get_trial_balance(context)
+    res['data'].append((
+        u'Período', u'Código', u'Cuenta', u'Movimientos'))
+    for period in context.get('account_periods', {}).get('periods'):
+        if not actual_period(period):
+            for acc in accounts:
+                acc_id = get_account_id(acc)
+                balance = get_trial_balance_account(
+                    context, period['id'], acc_id)
+                if not balance.get('credit') and not balance.get('debit') :
+                    res['data'].append((
+                        period.get('code') or '',
+                        acc,
+                        balance.get('acc_name') or '',
+                        float(balance.get('amount_period')),
                         ))
     if len(res['data']) == 1:
         res['data'] = []

@@ -82,6 +82,8 @@ add_test_result(
     account.check_customs_form_state(context))
 add_test_result(
     account.check_zero_balance_accounts(context))
+add_test_result(
+    account.check_move_in_period_accounts(context))
 
 print '\nPruebas ejecutadas: %s' % context['count']
 
