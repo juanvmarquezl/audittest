@@ -25,6 +25,17 @@ def audit_get_periods(context):
     return period_ids
 
 
+def get_account_id(code):
+    ids = lnk.execute(
+        'account.account', 'search', [('code', '=', code)])
+    return ids and ids[0] or 0
+
+
+def actual_period(period):
+    today = time.strftime('%Y-%m-%d')
+    return today >= period['date_start'] and today <= period['date_stop']
+
+
 def audit_get_trial_balance(context):
     audit_get_periods(context)
     if context.get('account_periods', {}).get('trial_balance_loaded'):
@@ -119,7 +130,6 @@ def audit_opening_account_periods(context):
         'start': time.time(),
         }
     audit_get_periods(context)
-    audit_get_trial_balance(context)
     #~ period_ids = context.get('account_periods', {}).get('ids', [])
     periods = context.get('account_periods', {}).get('periods', [])
     opened = []
@@ -387,6 +397,41 @@ def check_customs_form_state(context):
             i['date_liq'],
             u'Borrador',
             ))
+    return res
+
+
+def check_zero_balance_accounts(context):
+    res = {
+        'name': u'Cuentas que deben quedar con saldo 0 al cierre del período',
+        'group': 'account',
+        'data': [],
+        'detail': u'Verifica que las cuentas seleccionadas tengan saldo 0 '
+                  u'al cierre de los períodos contables correspondientes. Se '
+                  u'omite el período actual.',
+        'start': time.time(),
+        }
+    accounts = (
+        '1132000001',  # IVA CRÉDITO FISCAL
+        '1132000003',  # IVA CRÉDITO FISCAL EN IMPORTACIONES
+        )
+    audit_get_trial_balance(context)
+    res['data'].append((
+        u'Período', u'Código', u'Cuenta', u'Saldo'))
+    for period in context.get('account_periods', {}).get('periods'):
+        if not actual_period(period):
+            for acc in accounts:
+                acc_id = get_account_id(acc)
+                balance = get_trial_balance_account(
+                    context, period['id'], acc_id)
+                if balance.get('balance'):
+                    res['data'].append((
+                        period.get('code') or '',
+                        acc,
+                        balance.get('acc_name') or '',
+                        balance.get('balance'),
+                        ))
+    if len(res['data']) == 1:
+        res['data'] = []
     return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

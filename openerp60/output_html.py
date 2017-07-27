@@ -3,7 +3,7 @@ from mako.template import Template
 
 
 def export_to_html(results, context):
-    print '\nCreando infrme de resultados...'
+    print '\nCreando informe de resultados...'
     mytemplate = Template(filename='./templates/results.html')
     html = mytemplate.render(res=results, ctx=context)
     html_file = open('./results/audittest.html', 'w')

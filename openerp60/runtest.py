@@ -80,6 +80,8 @@ add_test_result(
     account.check_document_sequences(context))
 add_test_result(
     account.check_customs_form_state(context))
+add_test_result(
+    account.check_zero_balance_accounts(context))
 
 print '\nPruebas ejecutadas: %s' % context['count']
 
