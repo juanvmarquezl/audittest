@@ -40,6 +40,7 @@ def add_test_result(test):
 
 
 print 'Iniciando pruebas de AuditTest...\n'
+
 #~ Sale
 add_test_result(
     sale.audit_sale_order_state(context))

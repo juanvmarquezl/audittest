@@ -22,6 +22,7 @@ import json
 #~ with open('data.sec', 'w') as outfile:
 #~     json.dump(base, outfile)
 
+#~ with open('data_dev.sec') as data_file:
 with open('data.sec') as data_file:
     dbase = json.load(data_file)
 

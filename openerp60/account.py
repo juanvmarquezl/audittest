@@ -25,6 +25,46 @@ def audit_get_periods(context):
     return period_ids
 
 
+def audit_get_trial_balance(context):
+    audit_get_periods(context)
+    if context.get('account_periods', {}).get('trial_balance_loaded'):
+        return False
+    for period in context.get('account_periods', {}).get('periods'):
+        balance_id = lnk.execute(
+            'tcv.trial.balance', 'create', {
+                'date_from': period['date_start'],
+                'date_to': period['date_stop'],
+                'non_zero': False,
+                'no_view': True,
+                'total_view': False,
+                'level': 0,
+                'show_code': False,
+                'use_ident': False,
+                'acc_from_id': 0,
+                'acc_to_id': 0,
+                })
+        lnk.execute(
+            'tcv.trial.balance', 'load_wizard_lines', balance_id, {})
+        balance = lnk.execute(
+            'tcv.trial.balance', 'read', balance_id, [])
+        line_ids = balance.pop('line_ids', [])
+        balance['line_ids'] = lnk.execute(
+            'tcv.trial.balance.lines', 'read', line_ids, [])
+        period.update({'trial_balance': balance})
+    context['account_periods']['trial_balance_loaded'] = True
+    return False
+
+
+def get_trial_balance_account(context, period_id, account_id):
+    audit_get_trial_balance(context)
+    for period in context.get('account_periods', {}).get('periods'):
+        if period.get('id') == period_id:
+            for line in period.get('trial_balance', {}).get('line_ids'):
+                if line['account_id'] == account_id:
+                    return line
+    return {}
+
+
 def audit_generic_99999_acounts_moves(context):
     date_start = context.get('date_start')
     date_end = context.get('date_end')
@@ -79,6 +119,7 @@ def audit_opening_account_periods(context):
         'start': time.time(),
         }
     audit_get_periods(context)
+    audit_get_trial_balance(context)
     #~ period_ids = context.get('account_periods', {}).get('ids', [])
     periods = context.get('account_periods', {}).get('periods', [])
     opened = []
