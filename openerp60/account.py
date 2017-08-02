@@ -379,7 +379,8 @@ def check_customs_form_state(context):
     date_start = context.get('date_start')
     date_end = context.get('date_end')
     res = {
-        'name': u'Estado de planilla de liquidacionde impuestos aduanales F86',
+        'name': u'Estado de planilla de liquidacion de impuestos aduanales '
+                u'F86',
         'group': 'account',
         'data': [],
         'detail': u'Verifica el estado de las planillas de impuestos '
