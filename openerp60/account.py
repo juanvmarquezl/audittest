@@ -57,7 +57,7 @@ def audit_get_trial_balance(context):
                 'no_view': True,
                 'total_view': False,
                 'level': 0,
-                'show_code': False,
+                'show_code': True,
                 'use_ident': False,
                 'acc_from_id': 0,
                 'acc_to_id': 0,
@@ -425,7 +425,7 @@ def check_zero_balance_accounts(context):
         )
     audit_get_trial_balance(context)
     res['data'].append((
-        u'Período', u'Código', u'Cuenta', u'Saldo'))
+        u'Período', u'Cuenta', u'Saldo'))
     for period in context.get('account_periods', {}).get('periods'):
         if not actual_period(period):
             for acc in accounts:
@@ -435,7 +435,6 @@ def check_zero_balance_accounts(context):
                 if balance.get('balance'):
                     res['data'].append((
                         period.get('code') or '',
-                        acc,
                         balance.get('acc_name') or '',
                         balance.get('balance'),
                         ))
@@ -478,17 +477,16 @@ def check_move_in_period_accounts(context):
         )
     audit_get_trial_balance(context)
     res['data'].append((
-        u'Período', u'Código', u'Cuenta', u'Movimientos'))
+        u'Período', u'Cuenta', u'Movimientos'))
     for period in context.get('account_periods', {}).get('periods'):
         if not actual_period(period):
             for acc in accounts:
                 acc_id = get_account_id(acc)
                 balance = get_trial_balance_account(
                     context, period['id'], acc_id)
-                if not balance.get('credit') and not balance.get('debit') :
+                if not balance.get('credit') and not balance.get('debit'):
                     res['data'].append((
                         period.get('code') or '',
-                        acc,
                         balance.get('acc_name') or '',
                         float(balance.get('amount_period')),
                         ))
@@ -496,4 +494,61 @@ def check_move_in_period_accounts(context):
         res['data'] = []
     return res
 
+
+def check_invalid_account_balance(context):
+    res = {
+        'name': u'Cuentas deudoras o acreedoras con saldo inverso',
+        'group': 'account',
+        'data': [],
+        'detail': u'Verifica que las cuentas de activo no '
+                  u'tengan saldo acreedor o del pasivo saldo deudor, a '
+                  u'excepción de las cuentas de orden',
+        'start': time.time(),
+        }
+    test = [
+        {'search_options': [('code', '>', '1'),
+                            ('code', '<', '2'),
+                            ('type', '!=', 'view')],
+         'type': 'Activo',
+         'except': ["1121000180", "1121500180", "1121500280", "1121500380",
+                    "1121500480", "1121500580", "1122000180", "1122000182",
+                    "1123000180", "1125000180", "1129099999", "1330199999",
+                    "1330299999", "1330399999", "1330400001", "1330400002",
+                    "1330400003", "1330400004", "1330599999", "1330699999",
+                    "1330799999", "1330899999", "1330999999", "1331099999",
+                    ],
+         },
+        {'search_options': [('code', '>', '2'),
+                            ('code', '<', '3'),
+                            ('type', '!=', 'view')],
+         'type': 'Pasivo',
+         'except': [],
+         }
+        ]
+    audit_get_trial_balance(context)
+    res['data'].append((
+        u'Período', u'Tipo', u'Cuenta', u'Saldo'))
+    for t in test:
+        accounts = lnk.execute(
+            'account.account', 'search', t['search_options'])
+        except_ids = lnk.execute(
+            'account.account', 'search', [('code', 'in', t['except'])])
+        for acc_id in accounts:
+            for period in context.get('account_periods', {}).get('periods'):
+                balance = get_trial_balance_account(
+                    context, period['id'], acc_id)
+                if acc_id not in except_ids and balance and (
+                        (t['type'] == 'Activo' and
+                         balance.get('balance') < 0) or
+                        (t['type'] == 'Pasivo' and
+                         balance.get('balance') > 0)):
+                    res['data'].append((
+                        period.get('code') or '',
+                        t['type'],
+                        balance.get('acc_name') or '',
+                        float(balance.get('balance', 0.0)),
+                        ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
