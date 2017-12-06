@@ -280,6 +280,8 @@ def check_sequence(params):
     for i in invalids:
         while i in data:
             data.remove(i)
+    while '' in data:
+        data.remove('')
     if params.get('trim_field'):
         data = [x[params['trim_field']:] for x in data]
     sec = [int(x.replace('-', '').replace('EX', '')) for x in data]
@@ -324,7 +326,7 @@ def check_document_sequences(context):
         }
     append_document_sequence(res, params)
     params = {
-        'name': 'Facturas de venta (Exportación)',
+        'name': u'Facturas de venta (Exportacion)',
         'model': 'account.invoice',
         'filter': [('type', '=', 'out_invoice'),
                    ('date_invoice', '>=', context['date_start']),
@@ -336,7 +338,7 @@ def check_document_sequences(context):
         }
     append_document_sequence(res, params)
     params = {
-        'name': 'Notas de crédito clientes (Nacionales)',
+        'name': u'Notas de credito clientes (Nacionales)',
         'model': 'account.invoice',
         'filter': [('type', '=', 'out_refund'),
                    ('date_invoice', '>=', context['date_start']),
@@ -348,7 +350,7 @@ def check_document_sequences(context):
         }
     append_document_sequence(res, params)
     params = {
-        'name': 'Documentos de venta',
+        'name': 'Documentos de venta (Nro. control)',
         'model': 'account.invoice',
         'filter': [('type', 'in', ('out_invoice', 'out_refund')),
                    ('date_invoice', '>=', context['date_start']),
@@ -359,7 +361,7 @@ def check_document_sequences(context):
         }
     append_document_sequence(res, params)
     params = {
-        'name': 'Comprobantes de retencion de IVA proveedores',
+        'name': u'Comprobantes de retencion de IVA proveedores',
         'model': 'account.wh.iva',
         'filter': [('type', 'in', ('in_invoice', 'in_refund')),
                    ('date', '>=', context['date_start']),
