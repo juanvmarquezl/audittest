@@ -553,4 +553,45 @@ def check_invalid_account_balance(context):
     if len(res['data']) == 1:
         res['data'] = []
     return res
+
+
+def check_reconcile_status(context):
+    res = {
+        'name': u'Estado de cuentas conciliables',
+        'group': 'account',
+        'data': [],
+        'detail': u'Verifica que las cuentas "conciliables" no tengan mas de '
+                  u'100 asientos pendientes de conciliación o que el saldo '
+                  u'del debe sea igual al haber y no están conciliadas. '
+                  u'Para solucionar estos problemas se deben verificar los '
+                  u'asientos pendientes por conciliar de cada cuenta y '
+                  u'conciliarlos (si procede) o en ciertos casos se puede '
+                  u'"Desmarcar" la cuenta como conciliable.',
+        'start': time.time(),
+        }
+    res['data'].append((
+        u'Código', u'Cuenta', u'Apuntes', u'Debe', u'Haber'))
+    sql = '''
+        select aa.code, aa.name, count(mv.id) as moves,
+               sum(mv.debit) as debit, sum(mv.credit) as credit
+        from account_move_line mv
+        left join account_account aa on mv.account_id = aa.id
+        where aa.reconcile = True and mv.reconcile_id is null
+        group by aa.code, aa.name
+        having count(mv.id) > 100 or sum(mv.debit) = sum(mv.credit)
+        order by aa.code
+        '''
+    for data in lnk.execute_sql(sql):
+        print data
+        res['data'].append((
+            data[0].decode('utf-8'),
+            data[1].decode('utf-8'),
+            data[2],
+            float(data[3]),
+            float(data[4])))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

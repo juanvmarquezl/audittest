@@ -44,7 +44,8 @@ def audit_tcv_stock_changes(context):
         if data:
             res['data'].append((
                 c['ref'], c['date'], c['state'],
-                data['picking_out_id'], data['picking_in_id']))
+                data.get('picking_out_id', ''),
+                data.get('picking_in_id', '')))
     if len(res['data']) == 1:
         res['data'] = []
     return res

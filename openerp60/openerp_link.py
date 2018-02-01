@@ -80,7 +80,7 @@ def search_partner_id(name):
 
 
 def execute_sql(sql, params=None):
-    conn_string = "host=%(host) dbname=%(dbname)s " + \
+    conn_string = "host=%(host)s dbname=%(dbname)s " \
                   "user=%(db_user)s password=%(db_pwrd)s" % dbase
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
