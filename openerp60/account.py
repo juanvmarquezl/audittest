@@ -582,7 +582,7 @@ def check_reconcile_status(context):
         order by aa.code
         '''
     for data in lnk.execute_sql(sql):
-        print data
+        # ~ print data
         res['data'].append((
             data[0].decode('utf-8'),
             data[1].decode('utf-8'),
@@ -593,5 +593,49 @@ def check_reconcile_status(context):
         res['data'] = []
     return res
 
+
+def audit_sso_acounts_moves(context):
+    """
+    Check relation between employes and company paiments, must be +- 0.37
+    """
+    res = {
+        'name': u'Relación de aportes SSO, empleado/patronales = 0,37 +-2%',
+        'group': 'account',
+        'data': [],
+        'detail': u'La relacion resultante de dividir los saldos mensuales '
+                  u'de las cuentas 2130200001 / 2150200001 debe ser de 0.37.',
+        'start': time.time(),
+        }
+    accounts = ('2130200001', '2150200001',  # P/E , P/P
+                )
+    audit_get_trial_balance(context)
+    res['data'].append((
+        u'Período', u'P/Empleado', u'P/Patronál', u'Relación'))
+    values = {}
+    # First, load account balance
+    for period in context.get('account_periods', {}).get('periods'):
+        if not actual_period(period):
+            values[period['id']] = {'period': period.get('code', '')}
+            for acc in accounts:
+                acc_id = get_account_id(acc)
+                # ~ Poner saldos en diccionario y luego dividir
+                balance = get_trial_balance_account(
+                    context, period['id'], acc_id)
+                values[period['id']][acc] = balance.get('balance', 0)
+    # Then compute and show relation
+    for period in context.get('account_periods', {}).get('periods'):
+        if values.get(period['id']):
+            data = values[period['id']]
+            relation = data.get('2150200001', 0) / data.get('2130200001', 1)
+            if relation < 0.3626 or relation > 0.3774:
+                res['data'].append((
+                    data.get('period'),
+                    data.get('2150200001'),
+                    data.get('2130200001'),
+                    '%.3f' % relation
+                    ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

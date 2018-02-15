@@ -41,7 +41,7 @@ def add_test_result(test):
 
 print 'Iniciando pruebas de AuditTest...\n'
 
-#~ Sale
+# Sale
 add_test_result(
     sale.audit_sale_order_state(context))
 
@@ -88,6 +88,8 @@ add_test_result(
     account.check_invalid_account_balance(context))
 add_test_result(
     account.check_reconcile_status(context))
+add_test_result(
+    account.audit_sso_acounts_moves(context))
 
 print '\nPruebas ejecutadas: %s' % context['count']
 
