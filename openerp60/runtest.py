@@ -56,6 +56,8 @@ add_test_result(
     stock.audit_tcv_bunble_status(context))
 add_test_result(
     stock.check_steel_grit_bags_25(context))
+add_test_result(
+    stock.check_first_stock_move_no_internal(context))
 
 # mrp
 add_test_result(

@@ -172,4 +172,44 @@ def check_steel_grit_bags_25(context):
         res['data'] = []
     return res
 
+
+def check_first_stock_move_no_internal(context):
+    res = {
+        'name': u'Primer movimiento de lotes',
+        'group': 'stock',
+        'data': [],
+        'detail': u'Verifica que el primer movimiento registrado para un '
+                  u'lote no tenga una ubicación "Interna" como origen. Si '
+                  u'es el caso se deben ajustar la secuencia de los '
+                  u'movimientos de inventario. Ocurre generalmente '
+                  u'cuando se recibe un bloque antes de que sea facturado',
+        'start': time.time(),
+        }
+    res['data'].append((
+        u'Producto', u'Lote', u'Ubicación', u'Fecha'))
+    sql = '''
+        select p.name as product, o.name as lot, l.name as location, t.date
+        from stock_move as t
+        join (select a.prodlot_id , min(a.date) as date
+              from stock_move as a group by a.prodlot_id)as t2
+        on t.prodlot_id = t2.prodlot_id and t.date = t2.date
+        left join stock_location l on t.location_id = l.id
+        left join stock_production_lot o on t.prodlot_id = o.id
+        left join product_template p on o.product_id = p.id
+        where t.date >= '%(date_start)s' and  l.usage = 'internal' and
+              t.state='done'
+        order by 1, 2
+        ''' % context
+    for data in lnk.execute_sql(sql):
+        # ~ print data
+        res['data'].append((
+            data[0].decode('utf-8'),
+            data[1].decode('utf-8'),
+            data[2].decode('utf-8'),
+            data[3]
+            ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
