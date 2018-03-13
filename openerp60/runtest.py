@@ -92,6 +92,8 @@ add_test_result(
     account.check_reconcile_status(context))
 add_test_result(
     account.audit_sso_acounts_moves(context))
+add_test_result(
+    account.check_invalid_account_group_balance(context))
 
 print '\nPruebas ejecutadas: %s' % context['count']
 

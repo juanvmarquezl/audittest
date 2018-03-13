@@ -638,4 +638,55 @@ def audit_sso_acounts_moves(context):
         res['data'] = []
     return res
 
+
+def check_invalid_account_group_balance(context):
+    """
+    Check that the balances of the different account groups do not have an
+    invalid balance
+    """
+    res = {
+        'name': u'Grupos de cuentas con saldo inválido',
+        'group': 'account',
+        'data': [],
+        'detail': u'Chequea que los saldos de los distintos grupos de cuentas '
+                  u'no tengan saldo invalido. Generalmente se trata de '
+                  u'inventarios con signo negativo por aplicación de consumo '
+                  u'en exceso',
+        'start': time.time(),
+        }
+    audit_get_trial_balance(context)
+    res['data'].append((
+        u'Período', u'Cuentas', u'Saldo'))
+    acc_groups = [
+        ('1121000100', '1121000110', '1121000111', '1121000180'),
+        ('1121500110', '1121500180'),
+        ('1121500210', '1121500280'),
+        ('1121500310', '1121500380'),
+        ('1121500410', '1121500480'),
+        ('1121500510', '1121500580'),
+        ('1122000110', '1122000180', '1122000182'),
+        ('1123000100', '1123000180', '1123000210', '1123000220', '1123000230'),
+        ('1125000100', '1125000180', '1125000210', '1125000220', '1125000230'),
+        ]
+    for period in context.get('account_periods', {}).get('periods'):
+        for grp in acc_groups:
+            acc_bal = 0
+            accounts = []
+            for acc in grp:
+                acc_id = get_account_id(acc)
+                # ~ Poner saldos en diccionario y luego dividir
+                balance = get_trial_balance_account(
+                    context, period['id'], acc_id)
+                acc_bal += balance.get('balance')
+                accounts.append(balance.get('acc_name'))
+            if acc_bal < 0:
+                res['data'].append((
+                    period.get('code') or '',
+                    '<br>'.join(accounts) + '<hl>',
+                    acc_bal
+                    ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
