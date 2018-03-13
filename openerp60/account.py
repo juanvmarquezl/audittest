@@ -94,7 +94,6 @@ def audit_generic_99999_acounts_moves(context):
         'detail': u'Los asientos aquí relacionados deben ser modificados '
                   u'para utilizar la cuenta específica de la empresa en '
                   u'lugar de la genérica.',
-        'start': time.time(),
         }
     accounts = ('1110199999', '2180199999',  # CXC NACIONALES
                 '1110399999', '2180299999',  # CXC RELACIONADAS
@@ -135,7 +134,6 @@ def audit_opening_account_periods(context):
         'data': [],
         'detail': u'Verifica la cantidad de períodos contables '
                   u'abiertos al mismo tiempo (Máx 2).',
-        'start': time.time(),
         }
     audit_get_periods(context)
     #~ period_ids = context.get('account_periods', {}).get('ids', [])
@@ -166,7 +164,6 @@ def audit_closed_account_period_moves_state(context):
         'data': [],
         'detail': u'Verifica la existencia de asientos en borrador en '
                   u'períodos contables cerrados.',
-        'start': time.time(),
         }
     audit_get_periods(context)
     #~ period_ids = context.get('account_periods', {}).get('ids', [])
@@ -206,7 +203,6 @@ def check_imex_purchase_orders(context):
         'detail': u'Verifica el estado de los documentos de compras '
                   u'de importación, con base en la lista de empresas '
                   u'registradas en los expedientes de importación.',
-        'start': time.time(),
         }
     imex_ids = lnk.execute(
         'tcv.import.management', 'search', [('state', '!=', 'cancel')])
@@ -311,7 +307,6 @@ def check_document_sequences(context):
         'data': [('Documento', 'Campo', 'Saltos de secuencia en')],
         'detail': u'Verifica que no existan saltos en la secuencia de '
                   u'los documentos.',
-        'start': time.time(),
         }
     params = {
         'name': 'Facturas de venta (Nacionales)',
@@ -388,7 +383,6 @@ def check_customs_form_state(context):
         'detail': u'Verifica el estado de las planillas de impuestos '
                   u'aduanales (Forma 86) asociadas a expedientes de '
                   u'importación.',
-        'start': time.time(),
         }
     imex_ids = lnk.execute(
         'customs.form', 'search', [('state', '=', 'draft'),
@@ -419,7 +413,6 @@ def check_zero_balance_accounts(context):
         'detail': u'Verifica que las cuentas seleccionadas tengan saldo 0 '
                   u'al cierre de los períodos contables correspondientes. Se '
                   u'omite el período actual.',
-        'start': time.time(),
         }
     accounts = (
         '1132000001',  # IVA CRÉDITO FISCAL
@@ -453,7 +446,6 @@ def check_move_in_period_accounts(context):
         'detail': u'Verifica que las cuentas seleccionadas tengan algún '
                   u'movimiento registrado en cada uno de los periodos. Se '
                   u'omite el período actual.',
-        'start': time.time(),
         }
     accounts = (
         '1330199999',  # DEPR.ACUM.EDIFICIOS
@@ -505,7 +497,6 @@ def check_invalid_account_balance(context):
         'detail': u'Verifica que las cuentas de activo no '
                   u'tengan saldo acreedor o del pasivo saldo deudor, a '
                   u'excepción de las cuentas de orden',
-        'start': time.time(),
         }
     test = [
         {'search_options': [('code', '>', '1'),
@@ -567,7 +558,6 @@ def check_reconcile_status(context):
                   u'asientos pendientes por conciliar de cada cuenta y '
                   u'conciliarlos (si procede) o en ciertos casos se puede '
                   u'"Desmarcar" la cuenta como conciliable.',
-        'start': time.time(),
         }
     res['data'].append((
         u'Código', u'Cuenta', u'Apuntes', u'Debe', u'Haber'))
@@ -604,7 +594,6 @@ def audit_sso_acounts_moves(context):
         'data': [],
         'detail': u'La relacion resultante de dividir los saldos mensuales '
                   u'de las cuentas 2130200001 / 2150200001 debe ser de 0.37.',
-        'start': time.time(),
         }
     accounts = ('2130200001', '2150200001',  # P/E , P/P
                 )
@@ -652,7 +641,6 @@ def check_invalid_account_group_balance(context):
                   u'no tengan saldo invalido. Generalmente se trata de '
                   u'inventarios con signo negativo por aplicación de consumo '
                   u'en exceso',
-        'start': time.time(),
         }
     audit_get_trial_balance(context)
     res['data'].append((

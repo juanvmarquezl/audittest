@@ -11,7 +11,6 @@ def audit_purchase_order_state(context):
         'group': 'purchase',
         'data': [],
         'detail': u'Verifica la existencia de órdenes de compra en excepción. Ver: Compras -> Compras -> Solicitudes de presupuesto',
-        'start': time.time(),
         }
     purchase_ids = lnk.execute(
         'purchase.order', 'search',
