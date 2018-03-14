@@ -8,6 +8,8 @@ from output_html import export_to_html
 import time
 from datetime import timedelta
 import openerp_link as lnk
+import sys
+import json
 
 
 results = {
@@ -27,14 +29,22 @@ context = {
     }
 
 
-def add_test_result(test):
+def add_test_result(audittest, context):
+    print '\tTesting: %s...' % (audittest.__name__),
+    sys.stdout.flush()
+    start = time.time()
+    test = audittest(context)
     end = time.time()
     test.update({
+        'test_name': audittest.__name__,
+        'start': start,
         'end': end,
-        'elapsed': str(timedelta(seconds=end - test.get('start', end))),
+        'elapsed': str(timedelta(seconds=end - start)),
         })
+    with open('./results/%s.json' % test['test_name'], 'w') as outfile:
+        json.dump(test, outfile)
     context['count'] += 1
-    print '\tTesting: [%s] %s' % (test.get('group'), test.get('name'))
+    print 'Done.'
     if test.get('data'):
         results[test.get('group')].append(test)
 
@@ -43,21 +53,21 @@ print 'Iniciando pruebas de AuditTest...\n'
 
 # Sale
 add_test_result(
-    sale.audit_sale_order_state(context))
+    sale.audit_sale_order_state, context)
 
 # Purchase
 add_test_result(
-    purchase.audit_purchase_order_state(context))
+    purchase.audit_purchase_order_state, context)
 
 # Stock
 add_test_result(
-    stock.audit_tcv_stock_changes(context))
+    stock.audit_tcv_stock_changes, context)
 add_test_result(
-    stock.audit_tcv_bunble_status(context))
+    stock.audit_tcv_bunble_status, context)
 add_test_result(
-    stock.check_steel_grit_bags_25(context))
+    stock.check_steel_grit_bags_25, context)
 add_test_result(
-    stock.check_first_stock_move_no_internal(context))
+    stock.check_first_stock_move_no_internal, context)
 
  res['data'].append((
                         period['name'],
@@ -65,41 +75,42 @@ add_test_result(
                         u'No existe registro para el período'
                         ))# mrp
 add_test_result(
-    mrpii.audit_tcv_mrp_gangsaw_picking(context))
+    mrpii.audit_tcv_mrp_gangsaw_picking, context)
 add_test_result(
-    mrpii.audit_tcv_mrp_finished_slab_picking(context))
+    mrpii.audit_tcv_mrp_finished_slab_picking, context)
 add_test_result(
-    mrpii.audit_tcv_mrp_waste_slab_state(context))
+    mrpii.audit_tcv_mrp_waste_slab_state, context)
 add_test_result(
-    mrpii.audit_tcv_mrp_supplies_picking(context))
+    mrpii.audit_tcv_mrp_supplies_picking, context)
 
 # account
 add_test_result(
-    account.audit_generic_99999_acounts_moves(context))
+    account.audit_generic_99999_acounts_moves, context)
 add_test_result(
-    account.audit_opening_account_periods(context))
+    account.audit_opening_account_periods, context)
 add_test_result(
-    account.audit_closed_account_period_moves_state(context))
+    account.audit_closed_account_period_moves_state, context)
 add_test_result(
-    account.check_imex_purchase_orders(context))
+    account.check_imex_purchase_orders, context)
 add_test_result(
-    account.check_document_sequences(context))
+    account.check_document_sequences, context)
 add_test_result(
-    account.check_customs_form_state(context))
+    account.check_customs_form_state, context)
 add_test_result(
-    account.check_zero_balance_accounts(context))
+    account.check_zero_balance_accounts, context)
 add_test_result(
-    account.check_move_in_period_accounts(context))
+    account.check_move_in_period_accounts, context)
 add_test_result(
-    account.check_invalid_account_balance(context))
+    account.check_invalid_account_balance, context)
 add_test_result(
-    account.check_reconcile_status(context))
+    account.check_reconcile_status, context)
 add_test_result(
-    account.audit_sso_acounts_moves(context))
+    account.audit_sso_acounts_moves, context)
 add_test_result(
-    account.check_invalid_account_group_balance(context))
+    account.check_fiscal_book_stocks_period, context)
 add_test_result(
-    account.check_fiscal_book_stocks_period(context))
+    account.check_invalid_account_group_balance, context)
+
 
 print '\nPruebas ejecutadas: %s' % context['count']
 

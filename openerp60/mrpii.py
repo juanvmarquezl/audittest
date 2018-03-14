@@ -12,7 +12,6 @@ def __audit_tcv_mrp_check_picking(context):
         'data': [],
         'detail': context.get('detail', ''),
         'model': context.get('model', ''),
-        'start': time.time(),
         }
     item_ids = lnk.execute(
         res['model'], 'search', [('date_end', '>=', date_start),
@@ -92,7 +91,6 @@ def audit_tcv_mrp_waste_slab_state(context):
         'detail': 'Para solventar las "Mermas no procesadas" se deben '
                   'marcar como "Listo" desde Manufactura II -> Procesos '
                   'productivos -> Procesos productivos.',
-        'start': time.time(),
         }
     item_ids = lnk.execute(
         res['model'], 'search', [('date_end', '>=', date_start),
@@ -132,7 +130,6 @@ def audit_tcv_mrp_supplies_picking(context):
         u'aprobados. Ver: Manufactura II -> Procesos productivos -> '
         u'Utilización de insumos de producción',
         'model': 'tcv.mrp.production.supplies',
-        'start': time.time(),
         }
     item_ids = lnk.execute(
         res['model'], 'search', [('date', '>=', date_start),

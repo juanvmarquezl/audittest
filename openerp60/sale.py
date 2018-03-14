@@ -11,7 +11,6 @@ def audit_sale_order_state(context):
         'group': 'sale',
         'data': [],
         'detail': u'Verifica la existencia de pedidos de venta en excepción',
-        'start': time.time(),
         }
     sales_ids = lnk.execute(
         'sale.order', 'search',

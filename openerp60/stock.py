@@ -12,7 +12,6 @@ def audit_tcv_stock_changes(context):
         'data': [],
         'detail': u'Se deben aprobar los albaranes correspondientes. '
                   'Primero la salida y luego la entrada.',
-        'start': time.time(),
         }
     changes_ids = lnk.execute(
         'tcv.stock.changes', 'search',
@@ -62,7 +61,6 @@ def audit_tcv_bunble_status(context):
                   u'exportación y el peso. Deben ajustarse los campos ' +
                   u'según corresponda. Almacen -> Trazabilidad -> Bulto. ' +
                   u'(No se usa límite de fechas)',
-        'start': time.time(),
         }
     bundles_ids = lnk.execute(
         'tcv.bundle', 'search',
@@ -134,7 +132,6 @@ def check_steel_grit_bags_25(context):
         'data': [],
         'detail': u'Verifica que las cantidades indicadas en los '
                   u'movimientos de stock de granalla sean múltiplos de 25Kg',
-        'start': time.time(),
         }
     categ_ids = lnk.execute(
         'product.category', 'search', [('name', '=', u'GRANALLA')])
@@ -183,7 +180,6 @@ def check_first_stock_move_no_internal(context):
                   u'es el caso se deben ajustar la secuencia de los '
                   u'movimientos de inventario. Ocurre generalmente '
                   u'cuando se recibe un bloque antes de que sea facturado',
-        'start': time.time(),
         }
     res['data'].append((
         u'Producto', u'Lote', u'Ubicación', u'Fecha'))
