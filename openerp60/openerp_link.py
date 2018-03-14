@@ -9,7 +9,7 @@ import json
 #~ Use this lines to create a data.sec file with security params
 
 #~ base = {
-#~    'directory': '/home/jmarquez/instancias/produccion/migration_data/data/',
+#~    'directory': '/home/dbernal/git/audittest/',
 #~    'host': "server ip addrs",
 #~    'port': "database port",
 #~    'dbname': 'database name',

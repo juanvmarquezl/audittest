@@ -677,4 +677,63 @@ def check_invalid_account_group_balance(context):
         res['data'] = []
     return res
 
+
+def check_fiscal_book_stocks_period(context):
+    #~ date_start = context.get('date_start')
+    #~ date_end = context.get('date_end')
+    res = {
+        'name': u'Libros fiscales por períodos',
+        'group': 'account',
+        'data': [],
+        'detail': u'Validar existencias de libros fiscales por periodo ',
+        'start': time.time(),
+        }
+    audit_get_periods(context)
+    books = [
+        {'res_model': 'fiscal.book',
+         'search_args': ('type', '=', 'purchase'),
+         'name': u'Libro de Compras',
+         },
+        {'res_model': 'fiscal.book',
+         'search_args': ('type', '=', 'sale'),
+         'name': u'Libro de Ventas',
+         },
+        {'res_model': 'tcv.stock.book',
+         'search_args': None,
+         'name': u'Libro de Inventario',
+         },
+        {'res_model': 'fiscal.summary',
+         'search_args': None,
+         'name': u'Resumen Fiscal para la Declaración',
+         },
+        ]
+    res['data'].append((u'Período', u'Libro', u'Observaciones'))
+    for period in context.get('account_periods', {}).get('periods'):
+        if not actual_period(period):
+            for book in books:
+                search_args = [('period_id', '=', period.get('id'))]
+                if book['search_args']:
+                    search_args.append(book['search_args'])
+                book_id = lnk.execute(
+                    book['res_model'], 'search', search_args)
+                if not book_id:
+                    res['data'].append((
+                        period['name'],
+                        book['name'],
+                        u'No existe registro para el período'
+                        ))
+                else:
+                    fbook = lnk.execute(
+                        book['res_model'], 'read', book_id[0])
+                    if fbook['state'] != 'done':
+                        res['data'].append((
+                            period['name'],
+                            book['name'],
+                            u'El libro no está marcado como listo'
+                            ))
+
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
