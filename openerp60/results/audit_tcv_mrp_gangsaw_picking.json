@@ -1,0 +1,1 @@
+{"group": "mrp", "name": "Albaranes de salida por Aserrados, no procesados", "detail": "Los albaranes listados a continuaci\u00f3n no han sido aprobados.", "elapsed": "0:00:05.850709", "start": 1521060799.731301, "test_name": "audit_tcv_mrp_gangsaw_picking", "end": 1521060805.58201, "model": "tcv.mrp.gangsaw", "data": []}

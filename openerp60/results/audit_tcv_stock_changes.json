@@ -1,0 +1,1 @@
+{"group": "stock", "name": "Ajustes a lotes de inventario pendientes", "detail": "Se deben aprobar los albaranes correspondientes. Primero la salida y luego la entrada.", "elapsed": "0:00:02.362837", "start": 1521060779.375551, "test_name": "audit_tcv_stock_changes", "end": 1521060781.738388, "data": []}
