@@ -59,7 +59,11 @@ add_test_result(
 add_test_result(
     stock.check_first_stock_move_no_internal(context))
 
-# mrp
+ res['data'].append((
+                        period['name'],
+                        book['name'],
+                        u'No existe registro para el período'
+                        ))# mrp
 add_test_result(
     mrpii.audit_tcv_mrp_gangsaw_picking(context))
 add_test_result(
@@ -94,6 +98,8 @@ add_test_result(
     account.audit_sso_acounts_moves(context))
 add_test_result(
     account.check_invalid_account_group_balance(context))
+add_test_result(
+    account.check_fiscal_book_stocks_period(context))
 
 print '\nPruebas ejecutadas: %s' % context['count']
 
