@@ -1,0 +1,49 @@
+<html lang="es" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>Tecvemar - Audittest</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+         integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    </head>
+    <body>
+
+        <h1>AuditTest</h1>
+        <hr>
+
+        <p>Auditoria automatizada para OpenERP</p>
+        <p>Realizada el: <b>${ ctx['date'] }</b></p>
+        <p>Rango de fechas: del <b>${ ctx['date_start'] }</b> al <b>${ ctx['date_end'] }</b></p>
+        <p>Base de datos: <b>${ ctx['database'] }</b></p>
+        <p>Pruebas ejecutadas: <b>${ ctx['count'] }</b></p>
+        <hr>
+        <h1>Resultados:</h1>
+        <% results = res %>
+        % for key in results.keys():
+            <% item = results[key] %>
+        <div id="${ key }">
+            % for test in item:
+            <h2>${ test['name'] }</h2>
+            <p class="text-primary">${ test['detail'] }</p>
+            <p>Tiempo: ${ test['elapsed'] }</p>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            % for row in test['data']:
+                ${makerow(row)}
+            % endfor
+            </table>
+
+            % endfor
+        </div>
+        % endfor
+    <br>
+    </body>
+</html>
+
+
+<%def name="makerow(row)">
+                <tr>
+                % for name in row:
+                    <td>${name}</td>
+                % endfor
+                </tr>
+</%def>

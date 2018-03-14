@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.sec
+openerp60/results/audittest.html
 
 # C extensions
 *.so
