@@ -724,7 +724,8 @@ def check_fiscal_book_stocks_period(context):
                         ))
                 else:
                     fbook = lnk.execute(
-                        book['res_model'], 'read', book_id[0])
+                        book['res_model'], 'read', book_id[0],
+                        ['state'])
                     if fbook['state'] != 'done':
                         res['data'].append((
                             period['name'],

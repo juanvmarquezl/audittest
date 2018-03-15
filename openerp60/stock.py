@@ -50,7 +50,7 @@ def audit_tcv_stock_changes(context):
     return res
 
 
-def audit_tcv_bunble_status(context):
+def audit_tcv_bundle_status(context):
     date_start = context.get('date_start')
     date_end = context.get('date_end')
     res = {
