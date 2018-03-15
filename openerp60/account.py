@@ -736,4 +736,38 @@ def check_fiscal_book_stocks_period(context):
         res['data'] = []
     return res
 
+
+def invoices_unpaids_balance_0(context):
+
+    res = {
+        'name': u'Facturas impagadas con Saldo 0',
+        'group': 'account',
+        'data': [],
+        'detail': u'Validar facturas impagadas con saldo 0 ',
+        'start': time.time(),
+        }
+    res['data'].append((
+        u'Número Factura',
+        u'Fecha',
+        u'Proveedor',
+        u'Saldo',
+        u'Observaciones',
+        ))
+    invoice_ids = lnk.execute(
+        'account.invoice', 'search', [('state', '=', 'open')])
+    invoice = lnk.execute(
+        'account.invoice', 'read', invoice_ids, [])
+    for inv in invoice:
+        if inv['residual'] == 0.0:
+            res['data'].append((
+                inv['number'],
+                inv['date_invoice'],
+                inv['partner_id'][1],
+                inv['residual'],
+                u'Facturas completamente pagadas'
+                ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
