@@ -1,1 +1,0 @@
-{"group": "account", "name": "Asientos abiertos en per\u00edodos cerrados", "detail": "Verifica la existencia de asientos en borrador en per\u00edodos contables cerrados.", "elapsed": "0:00:00.099879", "start": 1521060822.445952, "test_name": "audit_closed_account_period_moves_state", "end": 1521060822.545831, "data": []}

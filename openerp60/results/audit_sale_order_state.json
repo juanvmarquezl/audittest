@@ -1,1 +1,0 @@
-{"group": "sale", "name": "Pedidos de venta en excepci\u00f3n", "detail": "Verifica la existencia de pedidos de venta en excepci\u00f3n", "elapsed": "0:00:00.045263", "start": 1521060779.228601, "test_name": "audit_sale_order_state", "end": 1521060779.273864, "data": []}
