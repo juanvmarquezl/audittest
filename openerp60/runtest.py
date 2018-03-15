@@ -63,13 +63,15 @@ add_test_result(
 add_test_result(
     stock.audit_tcv_stock_changes, context)
 add_test_result(
-    stock.audit_tcv_bunble_status, context)
+    stock.audit_tcv_bundle_status, context)
 add_test_result(
     stock.check_steel_grit_bags_25, context)
 add_test_result(
     stock.check_first_stock_move_no_internal, context)
 
 # mrp
+add_test_result(
+    stock.check_blocks_stock, context)
 add_test_result(
     mrpii.audit_tcv_mrp_gangsaw_picking, context)
 add_test_result(
