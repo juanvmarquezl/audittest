@@ -208,4 +208,57 @@ def check_first_stock_move_no_internal(context):
         res['data'] = []
     return res
 
+
+def check_blocks_stock(context):
+
+    res = {
+        'name': u'Bloques con Stock menor a 1 m3 o bloques con costo 0',
+        'group': 'stock',
+        'data': [],
+        'detail': u'Verifica que los bloques en Stock sean mayores a 1 m3 '
+                  u'o que estos tengan costo 0',
+        }
+
+    res['data'].append((
+        u'Producto',
+        u'Lote',
+        u'Cantidad',
+        u'Costo',
+        u'Observaciones',
+        ))
+    categ_id = lnk.execute(
+        'product.category', 'search', [('name', '=', 'BLOQUES')])
+    report_id = lnk.execute(
+        'tcv.stock.by.location.report', 'create', {
+            'date': time.strftime('%Y-%m-%d'),
+            'categ_id': categ_id[0],
+            'report_type': 'normal'
+            })
+    lnk.execute(
+        'tcv.stock.by.location.report', 'button_load_inventory', [report_id])
+    line_ids = lnk.execute(
+        'tcv.stock.by.location.report.lines', 'search',
+        [('line_id', '=', report_id)])
+    lines = lnk.execute(
+        'tcv.stock.by.location.report.lines', 'read', line_ids,
+        ['product_id', 'prod_lot_id', 'product_qty', 'total_cost'])
+    for line in lines:
+        if line['product_qty'] < 1 or line['total_cost'] < 1:
+            obs = u'Stock de bloque menor a 1 m3' if line['product_qty'] < 1 \
+                else u'Bloque sin costo'
+            product = lnk.execute(
+                'product.product', 'read', line['product_id'], ['name'])
+            lot = lnk.execute(
+                'stock.production.lot', 'read', line['prod_lot_id'], ['name'])
+            res['data'].append((
+                product['name'],
+                lot['name'],
+                line['product_qty'],
+                line['total_cost'],
+                obs
+                ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

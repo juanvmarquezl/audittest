@@ -1,0 +1,1 @@
+{"group": "stock", "name": "Movimientos de granalla no m\u00faltiplos de 25Kg", "detail": "Verifica que las cantidades indicadas en los movimientos de stock de granalla sean m\u00faltiplos de 25Kg", "elapsed": "0:00:00.295813", "start": 1521060794.998538, "test_name": "check_steel_grit_bags_25", "end": 1521060795.294351, "data": []}
