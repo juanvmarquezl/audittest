@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 import openerp_link as lnk
 import time
+# ~ import datetime
 
 
 def audit_tcv_stock_changes(context):
@@ -202,7 +203,7 @@ def check_first_stock_move_no_internal(context):
             data[0].decode('utf-8'),
             data[1].decode('utf-8'),
             data[2].decode('utf-8'),
-            data[3]
+            data[3].strftime('%d/%m/%Y')
             ))
     if len(res['data']) == 1:
         res['data'] = []

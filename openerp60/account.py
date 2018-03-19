@@ -739,33 +739,43 @@ def check_fiscal_book_stocks_period(context):
 
 
 def invoices_unpaids_balance_0(context):
-
     res = {
         'name': u'Facturas impagadas con Saldo 0',
         'group': 'account',
         'data': [],
-        'detail': u'Validar facturas impagadas con saldo 0 ',
+        'detail': u'Validar facturas impagadas con saldo 0 o residual '
+                  u'(menor a 10,00)',
         'start': time.time(),
         }
     res['data'].append((
         u'Número Factura',
         u'Fecha',
-        u'Proveedor',
+        u'Tipo',
+        u'Proveedor/Cliente',
         u'Saldo',
         u'Observaciones',
         ))
     invoice_ids = lnk.execute(
         'account.invoice', 'search', [('state', '=', 'open')])
     invoice = lnk.execute(
-        'account.invoice', 'read', invoice_ids, [])
+        'account.invoice', 'read', invoice_ids,
+        ['number', 'date_invoice', 'partner_id', 'residual', 'type'])
+    inv_types = {
+        'in_invoice': u'Fct compra',
+        'out_invoice': u'Fct Venta',
+        'in_refund': u'N/C compra',
+        'out_refund': u'N/C compra',
+        }
     for inv in invoice:
-        if inv['residual'] == 0.0:
+        if inv['residual'] < 10.0:
             res['data'].append((
                 inv['number'],
                 inv['date_invoice'],
+                inv_types.get(inv['type'], 'Otro'),
                 inv['partner_id'][1],
                 inv['residual'],
-                u'Facturas completamente pagadas'
+                u'Facturas saldo residual' if inv['residual'] != 0.0 else
+                u'Facturas inpagadas con saldo 0'
                 ))
     if len(res['data']) == 1:
         res['data'] = []
