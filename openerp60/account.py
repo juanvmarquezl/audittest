@@ -740,10 +740,10 @@ def check_fiscal_book_stocks_period(context):
 
 def invoices_unpaids_balance_0(context):
     res = {
-        'name': u'Facturas impagadas con Saldo 0',
+        'name': u'Facturas inpagadas con Saldo 0',
         'group': 'account',
         'data': [],
-        'detail': u'Validar facturas impagadas con saldo 0 o residual '
+        'detail': u'Validar facturas inpagadas con saldo 0 o residual '
                   u'(menor a 10,00)',
         'start': time.time(),
         }
@@ -775,7 +775,7 @@ def invoices_unpaids_balance_0(context):
                 inv['partner_id'][1],
                 inv['residual'],
                 u'Facturas saldo residual' if inv['residual'] != 0.0 else
-                u'Facturas impagadas con saldo 0'
+                u'Facturas inpagadas con saldo 0'
                 ))
     if len(res['data']) == 1:
         res['data'] = []
