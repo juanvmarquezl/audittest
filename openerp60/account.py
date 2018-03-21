@@ -813,7 +813,6 @@ def check_total_vat(context):
          },
         ]
     for period in context.get('account_periods', {}).get('periods'):
-        print period
         if not actual_period(period):
             for book in books:
                 search_args = [('period_id', '=', period.get('id'))]
@@ -831,8 +830,6 @@ def check_total_vat(context):
                             ])
                 for line in book_lines:
                     if line['check_total'] != 0.0:
-                        #~ period = lnk.execute(
-                            #~ 'account.period', 'read', line['fb_id'][0], ['name'])
                         res['data'].append((
                             period['name'],
                             line['rank'],
@@ -843,6 +840,63 @@ def check_total_vat(context):
                             line['check_total'],
                             ))
 
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
+
+def check_inventory_lines_on_error(context):
+    res = {
+        'name': u'Errores en líneas de inventario',
+        'group': 'account',
+        'data': [],
+        'detail': u'Verifica errores producidos por '
+                  u' movimientos de inventarios erróneos ',
+        'start': time.time(),
+        }
+    res['data'].append((
+        u'Período',
+        u'Producto',
+        u'Error',
+        u'Final',
+        u'Teorico',
+        u'Diferencia',
+        u'Observaciones',
+        ))
+    error = [{'error:': 'True'
+              },
+             {'error': 'False',
+              }]
+    rev = {'True': 'Revisar, distinto a 0',
+           'False': '0, Valor correcto',
+           }
+    audit_get_periods(context)
+    for period in context.get('account_periods', {}).get('periods'):
+        if not actual_period(period):
+            period_id = period['id']
+            #~ print period['id'], 'periodo'
+            lines_ids = lnk.execute(
+                'tcv.stock.book.lines', 'search', [
+                    ('period_id', '=', period_id)])
+            lines_id = lnk.execute(
+                'tcv.stock.book.lines', 'read', lines_ids, [
+                    'on_error', 'stock_end', 'period_id', 'product_id',
+                    'stock_end', 'stock_theoric'])
+            for line in lines_id:
+                if line['on_error'] == error or \
+                   line['stock_end'] != line['stock_theoric']:
+                        stock_end = type(line['stock_end']) == float
+                        stock_theoric = type(line['stock_theoric']) == float
+                        dif = stock_end - stock_theoric
+                        res['data'].append((
+                            line['period_id'][1],
+                            line['product_id'][1],
+                            rev.get(line['on_error']),
+                            line['stock_end'],
+                            line['stock_theoric'],
+                            dif,
+                            u' Stock Final distinto al Teórico',
+                            ))
     if len(res['data']) == 1:
         res['data'] = []
     return res
