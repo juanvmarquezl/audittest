@@ -110,6 +110,8 @@ add_test_result(
     account.check_invalid_account_group_balance, context)
 add_test_result(
     account.invoices_unpaids_balance_0, context)
+add_test_result(
+    account.check_total_vat, context)
 
 print '\nPruebas ejecutadas: %s' % context['count']
 

@@ -740,10 +740,10 @@ def check_fiscal_book_stocks_period(context):
 
 def invoices_unpaids_balance_0(context):
     res = {
-        'name': u'Facturas impagadas con Saldo 0',
+        'name': u'Facturas inpagadas con Saldo 0',
         'group': 'account',
         'data': [],
-        'detail': u'Validar facturas impagadas con saldo 0 o residual '
+        'detail': u'Validar facturas inpagadas con saldo 0 o residual '
                   u'(menor a 10,00)',
         'start': time.time(),
         }
@@ -780,5 +780,64 @@ def invoices_unpaids_balance_0(context):
     if len(res['data']) == 1:
         res['data'] = []
     return res
+
+
+def check_total_vat(context):
+    res = {
+        'name': u'Valor líneas de Libros del IVA',
+        'group': 'account',
+        'data': [],
+        'detail': u'Veifica si existen inconsistencias en el detalle de los libros de compras y ventas',
+        'start': time.time(),
+        }
+    res['data'].append((
+        u'Período',
+        u'Libro',
+        u'Línea',
+        u'Fecha',
+        u'Nro. Factura',
+        u'Proveedor/Cliente',
+        u'Diferencia',
+        ))
+    audit_get_periods(context)
+    books = [
+        {'res_model': 'fiscal.book',
+         'search_args': ('type', '=', 'purchase'),
+         'name': u'Libro de Compras',
+         },
+        {'res_model': 'fiscal.book',
+         'search_args': ('type', '=', 'sale'),
+         'name': u'Libro de Ventas',
+         },
+        ]
+    for period in context.get('account_periods', {}).get('periods'):
+        if not actual_period(period):
+            for book in books:
+                search_args = [('period_id', '=', period.get('id')), 
+                               book['search_args']]
+                book_id = lnk.execute(
+                    book['res_model'], 'search', search_args)
+                fbook = lnk.execute(
+                    book['res_model'], 'read', book_id, ['fbl_ids'])
+                if book and fbook[0].get('fbl_ids'):
+                    book_lines = lnk.execute(
+                        'fiscal.book.line', 'read', fbook[0]['fbl_ids'], [
+                            'rank', 'emission_date', 'invoice_number', 
+                            'partner_name', 'check_total'])
+                for line in book_lines:
+                    if line['check_total'] != 0.0:
+                        res['data'].append((
+                            period['name'],
+                            book['name'],
+                            line['rank'],
+                            line['emission_date'],
+                            line['invoice_number'],
+                            line['partner_name'],
+                            line['check_total'],
+                            ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
