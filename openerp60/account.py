@@ -740,7 +740,7 @@ def check_fiscal_book_stocks_period(context):
 
 def invoices_unpaids_balance_0(context):
     res = {
-        'name': u'Facturas inpagadas con Saldo 0',
+        'name': u'Facturas impagadas con Saldo 0',
         'group': 'account',
         'data': [],
         'detail': u'Validar facturas impagadas con saldo 0 o residual '
@@ -792,7 +792,8 @@ def check_total_vat(context):
         'name': u'Valor líneas de Libros del IVA',
         'group': 'account',
         'data': [],
-        'detail': u'Veifica si existen inconsistencias en el detalle de los libros de compras y ventas',
+        'detail': u'Veifica si existen inconsistencias en el detalle de '
+                  u'los libros de compras y ventas',
         'start': time.time(),
         }
     res['data'].append((
@@ -857,49 +858,37 @@ def check_inventory_lines_on_error(context):
     res['data'].append((
         u'Período',
         u'Producto',
-        u'Error',
         u'Final',
         u'Teorico',
         u'Diferencia',
         u'Observaciones',
         ))
-    error = [{'error:': 'True'
-              },
-             {'error': 'False',
-              }]
-    rev = {'True': 'Revisar, distinto a 0',
-           'False': '0, Valor correcto',
-           }
     audit_get_periods(context)
     for period in context.get('account_periods', {}).get('periods'):
         if not actual_period(period):
             period_id = period['id']
-            #~ print period['id'], 'periodo'
             lines_ids = lnk.execute(
                 'tcv.stock.book.lines', 'search', [
                     ('period_id', '=', period_id)])
-            lines_id = lnk.execute(
+            lines = lnk.execute(
                 'tcv.stock.book.lines', 'read', lines_ids, [
                     'on_error', 'stock_end', 'period_id', 'product_id',
                     'stock_end', 'stock_theoric'])
-            for line in lines_id:
-                if line['on_error'] == error or \
+            for line in lines:
+                if line['on_error'] or \
                    line['stock_end'] != line['stock_theoric']:
-                        stock_end = type(line['stock_end']) == float
-                        stock_theoric = type(line['stock_theoric']) == float
-                        dif = stock_end - stock_theoric
                         res['data'].append((
                             line['period_id'][1],
                             line['product_id'][1],
-                            rev.get(line['on_error']),
                             line['stock_end'],
                             line['stock_theoric'],
-                            dif,
+                            line['stock_end'] - line['stock_theoric'],
+                            u'Linea con error' if line['on_error'] else
                             u' Stock Final distinto al Teórico',
                             ))
     if len(res['data']) == 1:
         res['data'] = []
     return res
 
-  
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
