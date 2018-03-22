@@ -48,7 +48,6 @@ def add_test_result(audittest, context):
     if test.get('data'):
         results[test.get('group')].append(test)
 
-
 print 'Iniciando pruebas de AuditTest...\n'
 
 # Sale
@@ -112,6 +111,8 @@ add_test_result(
     account.invoices_unpaids_balance_0, context)
 add_test_result(
     account.check_total_vat, context)
+add_test_result(
+    account.check_inventory_lines_on_error, context)
 
 print '\nPruebas ejecutadas: %s' % context['count']
 
