@@ -756,7 +756,11 @@ def invoices_unpaids_balance_0(context):
         u'Observaciones',
         ))
     invoice_ids = lnk.execute(
-        'account.invoice', 'search', [('state', '=', 'open')])
+        'account.invoice', 'search', [
+            ('state', '=', 'open'),
+            ('date_invoice', '>=', context['date_start']),
+            ('date_invoice', '<=', context['date_end']),
+            ])
     invoice = lnk.execute(
         'account.invoice', 'read', invoice_ids,
         ['number', 'date_invoice', 'partner_id', 'residual', 'type'])
@@ -813,7 +817,7 @@ def check_total_vat(context):
     for period in context.get('account_periods', {}).get('periods'):
         if not actual_period(period):
             for book in books:
-                search_args = [('period_id', '=', period.get('id')), 
+                search_args = [('period_id', '=', period.get('id')),
                                book['search_args']]
                 book_id = lnk.execute(
                     book['res_model'], 'search', search_args)
@@ -822,7 +826,7 @@ def check_total_vat(context):
                 if book and fbook[0].get('fbl_ids'):
                     book_lines = lnk.execute(
                         'fiscal.book.line', 'read', fbook[0]['fbl_ids'], [
-                            'rank', 'emission_date', 'invoice_number', 
+                            'rank', 'emission_date', 'invoice_number',
                             'partner_name', 'check_total'])
                 for line in book_lines:
                     if line['check_total'] != 0.0:
