@@ -219,7 +219,6 @@ def check_blocks_stock(context):
         'detail': u'Verifica que los bloques en Stock sean mayores a 1 m3 '
                   u'o que estos tengan costo 0',
         }
-
     res['data'].append((
         u'Producto',
         u'Lote',
@@ -257,6 +256,53 @@ def check_blocks_stock(context):
                 line['product_qty'],
                 line['total_cost'],
                 obs
+                ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
+
+def stock_move_granalla(context):
+    res = {
+        'name': u'Origen del movimiento de la granalla',
+        'group': 'stock',
+        'data': [],
+        'detail': u'Verifica que el destino sea produccion y el origen '
+                  u'distinto de patio de bloque',
+        }
+    res['data'].append((
+        u'Origen',
+        u'Destino',
+        u'Producto',
+        u'Observaciones',
+        ))
+    granalla = ('2926', '743', '744', '745')
+    destino = ('3', '59', '51', '75', '27', '63', '87', '15')
+    origen = ('12')
+    move_ids = lnk.execute(
+        'stock.move', 'search', [])
+    move_id = lnk.execute(
+        'stock.move', 'read', move_ids, ['location_id',
+                                         'location_dest_id',
+                                         'product_id'])
+    for moves in move_id:
+        if moves['product_id'][0] == granalla and ['location_id'][0] \
+                == origen and ['location_dest_id'][0][0] != destino:
+            print 'check'
+            origen_name = lnk.excute(
+                'stock.move', 'search', [('location_dest_id', '=', origen)])
+            destino_name = lnk.excute(
+                'stock.move', 'search', [('product_id', '=', destino)])
+            product_name = lnk.excute(
+                'product.product', 'search', [('product_id', '=', granalla)])
+            print origen_name
+            print destino_name
+            print product_name
+            res['data'].append((
+                origen_name,
+                destino_name,
+                product_name,
+                u'Origen de granalla distinto al Patio de bloque'
                 ))
     if len(res['data']) == 1:
         res['data'] = []

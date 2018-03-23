@@ -54,8 +54,8 @@ print 'Iniciando pruebas de AuditTest...\n'
 # Sale
 add_test_result(
     sale.audit_sale_order_state, context)
-
-# Purchase
+#~
+#~ # Purchase
 add_test_result(
     purchase.audit_purchase_order_state, context)
 
@@ -68,6 +68,8 @@ add_test_result(
     stock.check_steel_grit_bags_25, context)
 add_test_result(
     stock.check_first_stock_move_no_internal, context)
+add_test_result(
+    stock.stock_move_granalla, context)
 
 # mrp
 add_test_result(
@@ -112,6 +114,7 @@ add_test_result(
     account.invoices_unpaids_balance_0, context)
 add_test_result(
     account.check_total_vat, context)
+
 
 print '\nPruebas ejecutadas: %s' % context['count']
 
