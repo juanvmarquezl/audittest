@@ -115,7 +115,6 @@ add_test_result(
 add_test_result(
     account.check_total_vat, context)
 
-
 print '\nPruebas ejecutadas: %s' % context['count']
 
 export_to_html(results, context)
