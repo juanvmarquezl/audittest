@@ -232,7 +232,7 @@ def check_imex_purchase_orders(context):
                 'account.invoice', 'read', o['invoice_ids'],
                 ['journal_id', 'supplier_invoice_number', 'date_document',
                  'name', 'partner_id', 'expedient', 'dua_form_id', 'state',
-                 'import_id'])
+                 'import_id', 'customs_form_id'])
             for i in invoices:
                 if i['journal_id'][0] != 6:
                     obs_inv.append(u'Diario: %s' % i['journal_id'][1])
@@ -244,6 +244,26 @@ def check_imex_purchase_orders(context):
                     obs_inv.append(u'En borrador')
                 if obs_inv and i['name']:
                     obs_inv.append(i['name'])
+                if i['customs_form_id']:
+                    exp_imp_ids = i['customs_form_id'][0]
+                    duty_ids = lnk.execute(
+                        'customs.duty', 'search',
+                        [('name', '=', 'IMPUESTO AL VALOR AGREGADO')])
+                    imp_line = lnk.execute(
+                        'customs.form.line', 'search', [
+                            ('customs_form_id', '=', exp_imp_ids),
+                            ('tax_code', '=', duty_ids),
+                        ])
+                    import_tax_ids = lnk.execute(
+                        'account.invoice.tax', 'search',
+                        [('cfl_id', '=', imp_line)])
+                    if import_tax_ids:
+                        import_tax_id = lnk.execute(
+                            'account.invoice.tax', 'read', import_tax_ids,
+                            ['tax_amount', 'base_amount'])
+                        for imp in import_tax_id:
+                            if imp['tax_amount'] and imp['base_amount'] == 0:
+                                obs_inv.append(u'Tasa de IVA 0 en Expediente de Importación')
             if obs_inv:
                 data.append((
                     'INV',
