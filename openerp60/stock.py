@@ -271,55 +271,55 @@ def stock_move_granalla(context):
                   u'distinto de patio de bloque',
         }
     res['data'].append((
+        u'Producto',
         u'Origen',
         u'Destino',
-        u'Producto',
+        u'Referencia',
+        u'Lote de Producción',
+        u'Cantidad',
+        u'Estado',
+        u'Fecha',
         u'Observaciones',
         ))
-    granalla = (2926, 743, 74, 745)
-    destino = (3, 59, 51, 75, 27, 63, 87, 15)
-    origen = (12)
-
     granalla = lnk.execute(
         'product.category', 'search', [('name', '=', 'GRANALLA')])
-
-    print granalla
-
-    #~ print granalla
-
+    gran_id = lnk.execute(
+        'product.product', 'search', [('categ_id', '=', granalla)])
+    gran_name = lnk.execute(
+        'product.product', 'read', gran_id, ['name'])
+    for name in gran_name:
+        granalla_name = name['name']
     move_ids = lnk.execute(
-        'stock.move', 'search', [('product_id', 'in', granalla)])
-    for a in move_ids:
-        print a
-    print move_ids
-
-    #~ moves = lnk.execute(
-        #~ 'stock.move', 'read', move_ids, ['location_id',
-                                         #~ 'location_dest_id',
-                                         #~ 'product_id'])
-    #~ print move_ids
+        'stock.move', 'search', [('product_id', 'in', gran_id)])
+    location_ids = lnk.execute(
+        'stock.move', 'read', move_ids, ['location_id', 'location_dest_id',
+                                         'picking_id', 'prodlot_id',
+                                         'state', 'date', 'product_uos_qty'])
+    for loc in location_ids:
+        if loc['location_id'][1] == 'Patio bloques'and \
+           loc['location_dest_id'][1] != 'Producción':
+                if loc['prodlot_id']:
+                    lot = loc['prodlot_id'][1]
+                origen = loc['location_id'][1]
+                qty = loc['product_uos_qty']
+                destino = loc['location_dest_id'][1]
+                ref = loc['picking_id'][1]
+                state = loc['state']
+                date = loc['date']
+                print origen, destino, granalla_name
+                res['data'].append((
+                    granalla_name,
+                    origen,
+                    destino,
+                    ref,
+                    lot,
+                    qty,
+                    state,
+                    date,
+                    u'Movimiento origen - destino de la granalla inválido'
+                    ))
+    if len(res['data']) == 1:
+        res['data'] = []
     return res
-    #~ for move in moves:
-        #~ if moves['product_id'][0] == granalla and ['location_id'][0] \
-                #~ == origen and ['location_dest_id'][0][0] != destino:
-            #~ print 'check'
-            #~ origen_name = lnk.excute(
-                #~ 'stock.move', 'search', [('location_dest_id', '=', origen)])
-            #~ destino_name = lnk.excute(
-                #~ 'stock.move', 'search', [('product_id', '=', destino)])
-            #~ product_name = lnk.excute(
-                #~ 'product.product', 'search', [('product_id', '=', granalla)])
-            #~ print origen_name
-            #~ print destino_name
-            #~ print product_name
-            #~ res['data'].append((
-                #~ origen_name,
-                #~ destino_name,
-                #~ product_name,
-                #~ u'Origen de granalla distinto al Patio de bloque'
-                #~ ))
-    #~ if len(res['data']) == 1:
-        #~ res['data'] = []
-    #~ return res
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
