@@ -267,8 +267,8 @@ def stock_move_granalla(context):
         'name': u'Origen del movimiento de la granalla',
         'group': 'stock',
         'data': [],
-        'detail': u'Verifica que el destino sea produccion y el origen '
-                  u'distinto de patio de bloque',
+        'detail': u'Verifica que el destino sea Produccion y el origen '
+                  u'el Patio de bloque',
         }
     res['data'].append((
         u'Producto',
@@ -296,10 +296,8 @@ def stock_move_granalla(context):
                                          'picking_id', 'prodlot_id',
                                          'state', 'date', 'product_uos_qty'])
     for loc in location_ids:
-        if loc['location_id'][1] == 'Patio bloques'and \
-           loc['location_dest_id'][1] != 'Producción':
-                if loc['prodlot_id']:
-                    lot = loc['prodlot_id'][1]
+        if loc['location_dest_id'][1] == u'Producci\xf3n' and \
+                loc['location_id'][1] != 'Patio bloques':
                 origen = loc['location_id'][1]
                 qty = loc['product_uos_qty']
                 destino = loc['location_dest_id'][1]
@@ -307,6 +305,10 @@ def stock_move_granalla(context):
                 state = loc['state']
                 date = loc['date']
                 print origen, destino, granalla_name
+                if loc['prodlot_id']:
+                    lot = loc['prodlot_id'][1]
+                else:
+                    lot = 'Sin lote'
                 res['data'].append((
                     granalla_name,
                     origen,
@@ -316,7 +318,7 @@ def stock_move_granalla(context):
                     qty,
                     state,
                     date,
-                    u'Movimiento origen - destino de la granalla inválido'
+                    u'Movimiento origen de la granalla inválido'
                     ))
     if len(res['data']) == 1:
         res['data'] = []
