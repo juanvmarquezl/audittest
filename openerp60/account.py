@@ -263,7 +263,9 @@ def check_imex_purchase_orders(context):
                             ['tax_amount', 'base_amount'])
                         for imp in import_tax_id:
                             if imp['tax_amount'] and imp['base_amount'] == 0:
-                                obs_inv.append(u'Tasa de IVA 0 en Expediente de Importación')
+                                obs_inv.append(
+                                    u'Tasa de IVA 0 en Expediente de '
+                                    u'Importación')
             if obs_inv:
                 data.append((
                     'INV',
@@ -845,7 +847,7 @@ def check_total_vat(context):
                     book['res_model'], 'search', search_args)
                 fbook = lnk.execute(
                     book['res_model'], 'read', book_id, ['fbl_ids'])
-                if book and fbook[0].get('fbl_ids'):
+                if fbook and fbook[0].get('fbl_ids'):
                     book_lines = lnk.execute(
                         'fiscal.book.line', 'read', fbook[0]['fbl_ids'], [
                             'rank', 'emission_date', 'invoice_number',

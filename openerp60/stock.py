@@ -298,19 +298,19 @@ def stock_move_granalla(context):
     for m in moves:
         if m['location_dest_id'][1] == u'Producci\xf3n' and \
                 m['location_id'][1] != 'Patio bloques':
-                if m['prodlot_id']:
-                    lot = m['prodlot_id'][1]
-                res['data'].append((
-                    m['product_id'][1],
-                    m['location_id'][1],
-                    m['location_dest_id'][1],
-                    m['picking_id'][1],
-                    lot,
-                    m['product_uos_qty'],
-                    m['state'],
-                    m['date'],
-                    u'Movimiento origen de la granalla inválido'
-                    ))
+            if m['prodlot_id']:
+                lot = m['prodlot_id'][1]
+            res['data'].append((
+                m['product_id'][1],
+                m['location_id'][1],
+                m['location_dest_id'][1],
+                m['picking_id'][1],
+                lot,
+                m['product_uos_qty'],
+                m['state'],
+                m['date'],
+                u'Movimiento origen de la granalla inválido'
+                ))
     if len(res['data']) == 1:
         res['data'] = []
     return res
