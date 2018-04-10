@@ -304,7 +304,6 @@ def stock_move_granalla(context):
                 ref = loc['picking_id'][1]
                 state = loc['state']
                 date = loc['date']
-                print origen, destino, granalla_name
                 if loc['prodlot_id']:
                     lot = loc['prodlot_id'][1]
                 else:

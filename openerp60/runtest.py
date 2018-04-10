@@ -54,11 +54,11 @@ print 'Iniciando pruebas de AuditTest...\n'
 # Sale
 add_test_result(
     sale.audit_sale_order_state, context)
-#~ #~
+
 # Purchase
 add_test_result(
     purchase.audit_purchase_order_state, context)
-#~ #~
+
 # Stock
 add_test_result(
     stock.audit_tcv_stock_changes, context)

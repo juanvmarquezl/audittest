@@ -221,7 +221,7 @@ def check_imex_purchase_orders(context):
     for o in orders:
         obs_oc = []
         if o['state'] == 'except_invoice':
-            obs_oc.append(u'Excepción de fatura')
+            obs_oc.append(u'Excepción de factura')
         if o['state'] == 'draft':
             obs_oc.append(u'Solicitud de presupuesto')
         if o['pricelist_id'][0] == 8:
@@ -813,7 +813,7 @@ def check_total_vat(context):
     for period in context.get('account_periods', {}).get('periods'):
         if not actual_period(period):
             for book in books:
-                search_args = [('period_id', '=', period.get('id')), 
+                search_args = [('period_id', '=', period.get('id')),
                                book['search_args']]
                 book_id = lnk.execute(
                     book['res_model'], 'search', search_args)
@@ -822,7 +822,7 @@ def check_total_vat(context):
                 if book and fbook[0].get('fbl_ids'):
                     book_lines = lnk.execute(
                         'fiscal.book.line', 'read', fbook[0]['fbl_ids'], [
-                            'rank', 'emission_date', 'invoice_number', 
+                            'rank', 'emission_date', 'invoice_number',
                             'partner_name', 'check_total'])
                 for line in book_lines:
                     if line['check_total'] != 0.0:
