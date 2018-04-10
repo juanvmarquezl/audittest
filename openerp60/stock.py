@@ -263,6 +263,8 @@ def check_blocks_stock(context):
 
 
 def stock_move_granalla(context):
+    date_start = context.get('date_start')
+    date_end = context.get('date_end')
     res = {
         'name': u'Origen del movimiento de la granalla',
         'group': 'stock',
@@ -281,42 +283,32 @@ def stock_move_granalla(context):
         u'Fecha',
         u'Observaciones',
         ))
-    granalla = lnk.execute(
-        'product.category', 'search', [('name', '=', 'GRANALLA')])
-    gran_id = lnk.execute(
-        'product.product', 'search', [('categ_id', '=', granalla)])
-    gran_name = lnk.execute(
-        'product.product', 'read', gran_id, ['name'])
-    for name in gran_name:
-        granalla_name = name['name']
+    categ_ids = lnk.execute(
+        'product.category', 'search', [('name', '=', u'GRANALLA')])
+    product_ids = lnk.execute(
+        'product.product', 'search', [('categ_id', 'in', categ_ids)])
     move_ids = lnk.execute(
-        'stock.move', 'search', [('product_id', 'in', gran_id)])
-    location_ids = lnk.execute(
-        'stock.move', 'read', move_ids, ['location_id', 'location_dest_id',
-                                         'picking_id', 'prodlot_id',
-                                         'state', 'date', 'product_uos_qty'])
-    for loc in location_ids:
-        if loc['location_dest_id'][1] == u'Producci\xf3n' and \
-                loc['location_id'][1] != 'Patio bloques':
-                origen = loc['location_id'][1]
-                qty = loc['product_uos_qty']
-                destino = loc['location_dest_id'][1]
-                ref = loc['picking_id'][1]
-                state = loc['state']
-                date = loc['date']
-                if loc['prodlot_id']:
-                    lot = loc['prodlot_id'][1]
-                else:
-                    lot = 'Sin lote'
+        'stock.move', 'search',
+        [('date', '>=', date_start), ('date', '<=', date_end),
+         ('product_id', 'in', product_ids)])
+    moves = lnk.execute(
+        'stock.move', 'read', move_ids,
+        ('location_id', 'location_dest_id', 'picking_id', 'prodlot_id',
+         'state', 'date', 'product_uos_qty', 'product_id'))
+    for m in moves:
+        if m['location_dest_id'][1] == u'Producci\xf3n' and \
+                m['location_id'][1] != 'Patio bloques':
+                if m['prodlot_id']:
+                    lot = m['prodlot_id'][1]
                 res['data'].append((
-                    granalla_name,
-                    origen,
-                    destino,
-                    ref,
+                    m['product_id'][1],
+                    m['location_id'][1],
+                    m['location_dest_id'][1],
+                    m['picking_id'][1],
                     lot,
-                    qty,
-                    state,
-                    date,
+                    m['product_uos_qty'],
+                    m['state'],
+                    m['date'],
                     u'Movimiento origen de la granalla inválido'
                     ))
     if len(res['data']) == 1:
