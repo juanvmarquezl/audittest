@@ -221,7 +221,7 @@ def check_imex_purchase_orders(context):
     for o in orders:
         obs_oc = []
         if o['state'] == 'except_invoice':
-            obs_oc.append(u'Excepción de fatura')
+            obs_oc.append(u'Excepción de factura')
         if o['state'] == 'draft':
             obs_oc.append(u'Solicitud de presupuesto')
         if o['pricelist_id'][0] == 8:

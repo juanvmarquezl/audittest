@@ -219,7 +219,6 @@ def check_blocks_stock(context):
         'detail': u'Verifica que los bloques en Stock sean mayores a 1 m3 '
                   u'o que estos tengan costo 0',
         }
-
     res['data'].append((
         u'Producto',
         u'Lote',
@@ -258,6 +257,60 @@ def check_blocks_stock(context):
                 line['total_cost'],
                 obs
                 ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
+
+def stock_move_granalla(context):
+    date_start = context.get('date_start')
+    date_end = context.get('date_end')
+    res = {
+        'name': u'Origen del movimiento de la granalla',
+        'group': 'stock',
+        'data': [],
+        'detail': u'Verifica que el destino sea Produccion y el origen '
+                  u'el Patio de bloque',
+        }
+    res['data'].append((
+        u'Producto',
+        u'Origen',
+        u'Destino',
+        u'Referencia',
+        u'Lote de Producción',
+        u'Cantidad',
+        u'Estado',
+        u'Fecha',
+        u'Observaciones',
+        ))
+    categ_ids = lnk.execute(
+        'product.category', 'search', [('name', '=', u'GRANALLA')])
+    product_ids = lnk.execute(
+        'product.product', 'search', [('categ_id', 'in', categ_ids)])
+    move_ids = lnk.execute(
+        'stock.move', 'search',
+        [('date', '>=', date_start), ('date', '<=', date_end),
+         ('product_id', 'in', product_ids)])
+    moves = lnk.execute(
+        'stock.move', 'read', move_ids,
+        ('location_id', 'location_dest_id', 'picking_id', 'prodlot_id',
+         'state', 'date', 'product_uos_qty', 'product_id'))
+    for m in moves:
+        if m['location_dest_id'][1] == u'Producci\xf3n' and \
+                m['location_id'][1] != 'Patio bloques':
+                if m['prodlot_id']:
+                    lot = m['prodlot_id'][1]
+                res['data'].append((
+                    m['product_id'][1],
+                    m['location_id'][1],
+                    m['location_dest_id'][1],
+                    m['picking_id'][1],
+                    lot,
+                    m['product_uos_qty'],
+                    m['state'],
+                    m['date'],
+                    u'Movimiento origen de la granalla inválido'
+                    ))
     if len(res['data']) == 1:
         res['data'] = []
     return res
