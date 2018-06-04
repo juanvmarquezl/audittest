@@ -69,6 +69,9 @@ add_test_result(
     stock.check_first_stock_move_no_internal, context)
 add_test_result(
     stock.stock_move_granalla, context)
+add_test_result(
+    stock.stock_move_cient_lot, context)
+
 
 # mrp
 add_test_result(

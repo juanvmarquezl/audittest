@@ -315,4 +315,59 @@ def stock_move_granalla(context):
         res['data'] = []
     return res
 
+
+def stock_move_cient_lot(context):
+    date_start = context.get('date_start')
+    date_end = context.get('date_end')
+    res = {
+        'name': u'Devoluciones de Cliente',
+        'group': 'stock',
+        'data': [],
+        'detail': u'Verifica que la ubicacion destino de los lotes devueltos '
+                  u'sea diferente a Por despachar',
+        }
+    res['data'].append((
+        u'Producto',
+        u'Origen',
+        u'Destino',
+        u'Referencia',
+        u'Lote de Producción',
+        u'Cantidad',
+        u'Estado',
+        u'Fecha',
+        u'Observaciones',
+        ))
+    categ_ids = lnk.execute(
+        'product.category', 'search', [('name', '=', u'MANU - LÁMINAS')])
+    product_ids = lnk.execute(
+        'product.product', 'search', [('categ_id', 'in', categ_ids)])
+    move_ids = lnk.execute(
+        'stock.move', 'search',
+        [('date', '>=', date_start), ('date', '<=', date_end),
+         ('product_id', 'in', product_ids)])
+    moves = lnk.execute(
+        'stock.move', 'read', move_ids,
+        ('location_id', 'location_dest_id', 'picking_id', 'prodlot_id',
+         'state', 'date', 'product_uos_qty', 'product_id'))
+    for m in moves:
+        if m['location_dest_id'][1] == u'Por despachar' and \
+                m['location_id'][1] == 'Clientes':
+            if m['prodlot_id']:
+                lot = m['prodlot_id'][1]
+            res['data'].append((
+                m['product_id'][1],
+                m['location_id'][1],
+                m['location_dest_id'][1],
+                m['picking_id'][1],
+                lot,
+                m['product_uos_qty'],
+                m['state'],
+                m['date'],
+                u'El lote no debe estar en la ubicacion teorica Por despachar'
+                ))
+    if len(res['data']) == 1:
+        res['data'] = []
+    return res
+
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
