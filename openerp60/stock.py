@@ -339,34 +339,38 @@ def stock_move_cient_lot(context):
         ))
     categ_ids = lnk.execute(
         'product.category', 'search', [('name', '=', u'MANU - LÁMINAS')])
+    location_id = lnk.execute(
+        'stock.location', 'search', [('name', '=', u'Clientes'), ])
+    location_dest_id = lnk.execute(
+        'stock.location', 'search', [('name', '=', u'Por despachar')])
     product_ids = lnk.execute(
         'product.product', 'search', [('categ_id', 'in', categ_ids)])
     move_ids = lnk.execute(
         'stock.move', 'search',
         [('date', '>=', date_start), ('date', '<=', date_end),
          ('product_id', 'in', product_ids),
-         ('location_dest_id', '=', 'Por despachar'),
-         ('location_id', '=', 'Clientes')])
-    print move_ids
-    moves = lnk.execute(
-        'stock.move', 'read', move_ids,
-        ('location_id', 'location_dest_id', 'picking_id', 'prodlot_id',
-         'state', 'date', 'product_uos_qty', 'product_id'))
+         ('location_dest_id', 'in', location_dest_id),
+         ('location_id', 'in', location_id)])
     if move_ids:
-        for m in moves:
-            if m['prodlot_id']:
-                lot = m['prodlot_id'][1]
-            res['data'].append((
-                m['product_id'][1],
-                m['location_id'][1],
-                m['location_dest_id'][1],
-                m['picking_id'][1],
-                lot,
-                m['product_uos_qty'],
-                m['state'],
-                m['date'],
-                u'El lote no debe estar en la ubicacion teorica Por despachar'
-                ))
+        moves = lnk.execute(
+            'stock.move', 'read', move_ids,
+            ('location_id', 'location_dest_id', 'picking_id', 'prodlot_id',
+             'state', 'date', 'product_uos_qty', 'product_id'))
+        if move_ids:
+            for m in moves:
+                if m['prodlot_id']:
+                    lot = m['prodlot_id'][1]
+                res['data'].append((
+                    m['product_id'][1],
+                    m['location_id'][1],
+                    m['location_dest_id'][1],
+                    m['picking_id'][1],
+                    lot,
+                    m['product_uos_qty'],
+                    m['state'],
+                    m['date'],
+                    u'El lote no debe estar en la ubicacion teorica Por despachar'
+                    ))
     if len(res['data']) == 1:
         res['data'] = []
     return res
