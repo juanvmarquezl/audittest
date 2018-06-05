@@ -344,14 +344,16 @@ def stock_move_cient_lot(context):
     move_ids = lnk.execute(
         'stock.move', 'search',
         [('date', '>=', date_start), ('date', '<=', date_end),
-         ('product_id', 'in', product_ids)])
+         ('product_id', 'in', product_ids),
+         ('location_dest_id', '=', 'Por despachar'),
+         ('location_id', '=', 'Clientes')])
+    print move_ids
     moves = lnk.execute(
         'stock.move', 'read', move_ids,
         ('location_id', 'location_dest_id', 'picking_id', 'prodlot_id',
          'state', 'date', 'product_uos_qty', 'product_id'))
-    for m in moves:
-        if m['location_dest_id'][1] == u'Por despachar' and \
-                m['location_id'][1] == 'Clientes':
+    if move_ids:
+        for m in moves:
             if m['prodlot_id']:
                 lot = m['prodlot_id'][1]
             res['data'].append((
