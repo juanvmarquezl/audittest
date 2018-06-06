@@ -337,20 +337,16 @@ def stock_move_cient_lot(context):
         u'Fecha',
         u'Observaciones',
         ))
-    categ_ids = lnk.execute(
-        'product.category', 'search', [('name', '=', u'MANU - LÁMINAS')])
     location_id = lnk.execute(
         'stock.location', 'search', [('name', '=', u'Clientes'), ])
     location_dest_id = lnk.execute(
         'stock.location', 'search', [('name', '=', u'Por despachar')])
-    product_ids = lnk.execute(
-        'product.product', 'search', [('categ_id', 'in', categ_ids)])
     move_ids = lnk.execute(
         'stock.move', 'search',
         [('date', '>=', date_start), ('date', '<=', date_end),
-         ('product_id', 'in', product_ids),
          ('location_dest_id', 'in', location_dest_id),
-         ('location_id', 'in', location_id)])
+         ('location_id', 'in', location_id),
+         ('state', '=', 'done')])
     if move_ids:
         moves = lnk.execute(
             'stock.move', 'read', move_ids,
@@ -369,7 +365,7 @@ def stock_move_cient_lot(context):
                     m['product_uos_qty'],
                     m['state'],
                     m['date'],
-                    u'El lote no debe estar en la ubicacion teorica Por despachar'
+                    u'El lote no debe volver en la ubicación teórica "Por despachar"'
                     ))
     if len(res['data']) == 1:
         res['data'] = []
