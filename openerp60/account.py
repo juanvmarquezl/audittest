@@ -504,7 +504,7 @@ def check_move_in_period_accounts(context):
                     res['data'].append((
                         period.get('code') or '',
                         balance.get('acc_name') or '',
-                        float(balance.get('amount_period')),
+                        float(balance.get('amount_period', 0)),
                         ))
     if len(res['data']) == 1:
         res['data'] = []
@@ -873,8 +873,10 @@ def check_inventory_lines_on_error(context):
         'name': u'Errores en líneas de inventario',
         'group': 'account',
         'data': [],
-        'detail': u'Verifica errores producidos por '
-                  u' movimientos de inventarios erróneos ',
+        'detail': u'Verifica errores producidos por movimientos de '
+                  u'inventarios erróneos, Si aparece un error en láminas, '
+                  u'se deben verificar primero los movimientos de láminas '
+                  u'con ajustes',
         'start': time.time(),
         }
     res['data'].append((

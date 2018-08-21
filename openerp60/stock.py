@@ -58,9 +58,9 @@ def audit_tcv_bundle_status(context):
         'name': u'Estatus de bundles de exportación',
         'group': 'stock',
         'data': [],
-        'detail': u'Comprueba la disponibilidad real de los bundles de ' +
-                  u'exportación y el peso. Deben ajustarse los campos ' +
-                  u'según corresponda. Almacen -> Trazabilidad -> Bulto. ' +
+        'detail': u'Comprueba la disponibilidad real de los bundles de '
+                  u'exportación y el peso. Deben ajustarse los campos '
+                  u'según corresponda. Almacen -> Trazabilidad -> Bulto. '
                   u'(No se usa límite de fechas)',
         }
     bundles_ids = lnk.execute(
@@ -222,6 +222,7 @@ def check_blocks_stock(context):
     res['data'].append((
         u'Producto',
         u'Lote',
+        u'Fecha',
         u'Cantidad',
         u'Costo',
         u'Observaciones',
@@ -243,16 +244,18 @@ def check_blocks_stock(context):
         'tcv.stock.by.location.report.lines', 'read', line_ids,
         ['product_id', 'prod_lot_id', 'product_qty', 'total_cost'])
     for line in lines:
-        if line['product_qty'] < 1 or line['total_cost'] < 1:
+        if line['product_qty'] < 1 or line['total_cost'] < 0.1:
             obs = u'Stock de bloque menor a 1 m3' if line['product_qty'] < 1 \
                 else u'Bloque sin costo'
             product = lnk.execute(
                 'product.product', 'read', line['product_id'], ['name'])
             lot = lnk.execute(
-                'stock.production.lot', 'read', line['prod_lot_id'], ['name'])
+                'stock.production.lot', 'read', line['prod_lot_id'],
+                ['name', 'date'])
             res['data'].append((
                 product['name'],
                 lot['name'],
+                lot['date'],
                 line['product_qty'],
                 line['total_cost'],
                 obs
